@@ -7,7 +7,6 @@ import database.models as models
 
 from core.api.account_crud import router as accounts_router
 from core.api.applicant_crud import router as applicant_router
-# from core.api.company_account_crud import router as company_account_router
 from core.api.company_crud import router as company_router
 from core.api.job_crud import router as job_router
 from core.api.tag_crud import router as tag_router
@@ -40,7 +39,6 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(accounts_router)
 app.include_router(applicant_router)
-# app.include_router(company_account_router)
 app.include_router(company_router)
 app.include_router(job_router)
 app.include_router(tag_router)
