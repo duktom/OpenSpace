@@ -18,8 +18,6 @@ class AccountSchemaGET(BaseModel):
 class AccountSchemaPOST(BaseModel):
     email: str
     password: str
-    type: bool
-    is_email_verified: bool
 
 
 class AccountSchemaPUT(BaseModel):
