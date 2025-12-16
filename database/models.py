@@ -10,7 +10,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship, declarative_base, foreign, remote
 
 Base = declarative_base()
 
@@ -27,7 +27,7 @@ class Account(Base):
     password = Column(String, nullable=False)
 
     # e.g. "applicant", "recruiter", "admin"
-    type = Column(String(50), nullable=False)
+    type = Column(String(50), nullable=True)
 
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     exp_date = Column(DateTime, nullable=True)
@@ -225,9 +225,10 @@ class Job(Base):
 
     entity_tags = relationship(
         "EntityTag",
-        back_populates="job",
-        primaryjoin="and_(EntityTag.entity_id == Job.id, "
-                    "EntityTag.entity_type == 'job')",
+        primaryjoin=lambda: and_(
+            foreign(EntityTag.entity_id) == remote(Job.id),
+            EntityTag.entity_type == "job",
+        ),
         viewonly=True,
     )
 
@@ -321,8 +322,9 @@ class EntityTag(Base):
 
     job = relationship(
         "Job",
-        primaryjoin="and_(EntityTag.entity_id == Job.id, "
-                    "EntityTag.entity_type == 'job')",
-        back_populates="entity_tags",
+        primaryjoin=lambda: and_(
+            foreign(EntityTag.entity_id) == remote(Job.id),
+            EntityTag.entity_type == "job",
+        ),
         viewonly=True,
     )
