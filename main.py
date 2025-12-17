@@ -1,6 +1,9 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from dotenv import load_dotenv
 
 import database.database as database
 import database.models as models
@@ -15,6 +18,8 @@ from core.services.debug_service.logger_config import get_logger
 
 logger = get_logger(__name__)
 
+load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,7 +29,8 @@ async def lifespan(app: FastAPI):
 
         if hasattr(database, 'init_db'):
             if database.init_db() is False:
-                logger.warning("There are some problems with database. Check connection!")
+                logger.warning(
+                    "There are some problems with database. Check connection!")
 
     except Exception as e:
         logger.error(f"Critical error while initializing db! {e}")
@@ -37,6 +43,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 app.include_router(accounts_router)
 app.include_router(applicant_router)
 app.include_router(company_router)
@@ -44,4 +58,9 @@ app.include_router(job_router)
 app.include_router(tag_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(
+        "main:app",
+        host=os.getenv("HOST"),
+        port=int(os.getenv("PORT")),
+        reload=True
+    )
