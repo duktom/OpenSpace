@@ -7,7 +7,8 @@ from core.services.queries_service.base_queries import BaseQueries
 from core.services.auth_service.auth_queries_service import AuthQueries
 
 from core.services.auth_service.auth_config import (
-    veryfy_password,
+    set_auth_cookie,
+    verify_password,
     create_access_token,
     get_current_account,
     COOKIE_NAME,
@@ -20,8 +21,14 @@ auth_service = AuthQueries()
 
 
 @router.get("/me/")
-def read_user_me(current_email: str = Depends(get_current_account)):
-    return {"email": current_email, "status": "AUTHENTICATED"}
+def read_user_me(response: Response, current_account: Account = Depends(get_current_account)):
+    access_token = create_access_token(data={"sub": current_account.email})
+    set_auth_cookie(response, access_token)
+
+    return {
+        "access_token": access_token,
+        "message": "AUTHENTICATED"
+    }
 
 
 @router.get("/{id}/")
@@ -43,21 +50,17 @@ async def register(account: AccountSchemaPOST):
 @router.post("/login/")
 async def login(credentials: AccountSchemaPOST, response: Response):
     account = auth_service.get_account_by_email(credentials.email)
-    if not account or not veryfy_password(credentials.password, account.password):
-        raise HTTPException(status_code=401, detail="INCORRECT EMAIL OR PASSWORD")
+    if not account or not verify_password(credentials.password, account.password):
+        raise HTTPException(
+            status_code=401, detail="INCORRECT EMAIL OR PASSWORD")
 
     access_token = create_access_token(data={"sub": account.email})
+    set_auth_cookie(response, access_token)
 
-    response.set_cookie(
-        key=COOKIE_NAME,
-        value=access_token,
-        httponly=True,
-        samesite='lax',
-        secure=False,
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    )
-    return {"message": "LOGIN SUCCESSFULLY"}
+    return {
+        "access_token": access_token,
+        "message": "LOGIN SUCCESSFULLY"
+    }
 
 
 @router.post("/logout/")

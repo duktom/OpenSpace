@@ -1,20 +1,25 @@
 from datetime import datetime, timedelta
 from fastapi import Request, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Account
+from fastapi import Response
 
 SECRET_KEY = "tajny_klucz_produkcyjny"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 COOKIE_NAME = "open_space_auth"
 
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="account/login", auto_error=False)
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def veryfy_password(plain_password, hashed_password):
+def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -29,8 +34,26 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def get_current_account(request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get(COOKIE_NAME)
+def set_auth_cookie(response: Response, access_token: str):
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=access_token,
+        httponly=True,
+        samesite='lax',
+        secure=False,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
+
+
+def get_current_account(
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    if not token:
+        token = request.cookies.get(COOKIE_NAME)
+
     if not token:
         raise HTTPException(status_code=401, detail="NOT AUTHORIZED")
 
@@ -43,7 +66,7 @@ def get_current_account(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="TOKEN VERIFICATION ERROR")
 
     account = db.query(Account).filter(Account.email == email).first()
-    if email is None:
+    if account is None:
         raise HTTPException(status_code=401, detail="ACCOUNT NOT FOUND")
 
     return account
