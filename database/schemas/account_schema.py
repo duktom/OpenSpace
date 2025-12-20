@@ -6,11 +6,11 @@ from pydantic import ConfigDict
 class AccountSchemaGET(BaseModel):
     id: int
     email: str
-    password: str
-    type: bool
-    creation_time: datetime
-    expiry_date: datetime
-    is_email_verified: bool
+    # password: str
+    type: str | None = None
+    creation_date: datetime
+    exp_date: datetime
+    is_verified: bool
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -24,5 +24,5 @@ class AccountSchemaPUT(BaseModel):
     id: int
     email: str
     password: str
-    type: bool
+    type: str | None = None
     is_email_verified: bool

@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Response, Depends
 from database.models import Account
 from database.schemas.account_schema import AccountSchemaPOST
 from database.schemas.account_schema import AccountSchemaPUT
+from database.schemas.register_schema import RegisterApplicantSchema
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.auth_service.auth_queries_service import AuthQueries
 
@@ -14,6 +15,7 @@ from core.services.auth_service.auth_config import (
     COOKIE_NAME,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
+from database.schemas.register_schema import RegisterCompanySchema
 
 router = APIRouter(prefix="/account", tags=["Accounts"])
 service = BaseQueries(Account)
@@ -42,9 +44,30 @@ async def get_all_accounts():
 
 
 @router.post("/register/")
-async def register(account: AccountSchemaPOST):
-    auth_service.create_account(account)
-    return {"msg": "Account created successfully"}
+async def register_deprecated():
+    raise HTTPException(
+        status_code=410,
+        detail="Registration moved to /account/register/user/ or /account/register/company/"
+    )
+
+
+@router.post("/register/company/", status_code=201)
+async def register_company(schema: RegisterCompanySchema):
+    created = auth_service.register_company(schema)
+    return {
+        "msg": "Company account created successfully",
+        "account_id": created["account_id"],
+        "company_id": created["company_id"],
+    }
+
+@router.post("/register/user/", status_code=201)
+async def register_applicant(schema: RegisterApplicantSchema):
+    created = auth_service.register_applicant(schema)
+    return {
+        "msg": "Applicant account created successfully",
+        "account_id": created["account_id"],
+        "applicant_id": created["applicant_id"],
+    }
 
 
 @router.post("/login/")

@@ -1,5 +1,6 @@
 from sqlalchemy import (
     Column,
+    MetaData,
     String,
     Integer,
     Boolean,
@@ -12,7 +13,8 @@ from sqlalchemy import (
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, declarative_base, foreign, remote
 
-Base = declarative_base()
+metadata = MetaData()
+Base = declarative_base(metadata=metadata)
 
 
 # ======================
@@ -139,6 +141,7 @@ class Company(Base):
     name = Column(String(255), nullable=False)
     description = Column(String(255), nullable=True)
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
+    nip = Column(String(10), unique=True, nullable=False)
 
     admins = relationship(
         "CompanyAdmin",
