@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Response, Depends
+from fastapi import APIRouter, HTTPException, Response, Depends,UploadFile, File
 
 from database.models import Account
 from database.schemas.account_schema import AccountSchemaPOST
 from database.schemas.account_schema import AccountSchemaPUT
 from core.services.queries_service.base_queries import BaseQueries
+from core.services.file_service.file_storage_service import ImageService
 from core.services.auth_service.auth_queries_service import AuthQueries
+
 
 from core.services.auth_service.auth_config import (
     set_auth_cookie,
@@ -15,8 +17,10 @@ from core.services.auth_service.auth_config import (
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
 
+
 router = APIRouter(prefix="/account", tags=["Accounts"])
 service = BaseQueries(Account)
+image_service = ImageService(Account)
 auth_service = AuthQueries()
 
 
@@ -77,3 +81,27 @@ async def edit_account(schema: AccountSchemaPUT):
 @router.delete("/delete/")
 async def delete_account(id: int):
     return service.delete_record(id)
+
+@router.post(
+    "/image/{object_id}",
+    summary="Upload image for an account",
+)
+async def upload_object_image(
+    object_id: int,
+    file: UploadFile = File(...)
+):
+    return image_service.upload_object_image(
+        object_id,
+        file
+    )
+
+@router.get(
+        "/image/{object_id}",
+        summary="Return image for an account")
+async def get_object_image(object_id: int):
+    return image_service.get_object_image(object_id)
+
+
+@router.delete("/image/delete/{object_id}")
+async def delete_object_image(object_id: int):
+    return image_service.delete_object_image(object_id)
