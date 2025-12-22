@@ -1,8 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from core.services.auth_service.auth_config import get_current_account
 from database.models import Applicant
-from database.schemas.applicant_schema import ApplicantSchemaPOST
 from database.schemas.applicant_schema import ApplicantSchemaPUT
 from core.services.queries_service.base_queries import BaseQueries
 
@@ -18,13 +16,6 @@ async def get_aaplicant_by_id(id: int):
 @router.get("/")
 async def get_all_applicants():
     return service.get_all_with_relations()
-
-
-@router.post("/add/")
-async def add_applicant(
-    schema: ApplicantSchemaPOST,
-    current_account=Depends(get_current_account)):
-    return service.post_record(schema)
 
 
 @router.put("/edit/")

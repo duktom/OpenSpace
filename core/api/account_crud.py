@@ -12,8 +12,7 @@ from core.services.auth_service.auth_config import (
     verify_password,
     create_access_token,
     get_current_account,
-    COOKIE_NAME,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    COOKIE_NAME
 )
 from database.schemas.register_schema import RegisterCompanySchema
 
@@ -43,14 +42,6 @@ async def get_all_accounts():
     return service.get_all_with_relations()
 
 
-@router.post("/register/")
-async def register_deprecated():
-    raise HTTPException(
-        status_code=410,
-        detail="Registration moved to /account/register/user/ or /account/register/company/"
-    )
-
-
 @router.post("/register/company/", status_code=201)
 async def register_company(schema: RegisterCompanySchema):
     created = auth_service.register_company(schema)
@@ -59,6 +50,7 @@ async def register_company(schema: RegisterCompanySchema):
         "account_id": created["account_id"],
         "company_id": created["company_id"],
     }
+
 
 @router.post("/register/user/", status_code=201)
 async def register_applicant(schema: RegisterApplicantSchema):

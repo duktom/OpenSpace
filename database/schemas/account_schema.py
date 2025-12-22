@@ -6,7 +6,6 @@ from pydantic import ConfigDict
 class AccountSchemaGET(BaseModel):
     id: int
     email: str
-    # password: str
     type: str | None = None
     creation_date: datetime
     exp_date: datetime

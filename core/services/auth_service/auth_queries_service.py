@@ -27,11 +27,11 @@ class AuthQueries(BaseQueries):
         except MissingDatabaseError as e:
             logger.error(f"Database error during get_account_by_email: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
-        
+
     # Company registration
     def register_company(self, data):
         try:
-            with db_session_scope() as session:
+            with db_session_scope(commit=True) as session:
                 # Check email uniqueness
                 existing = session.query(Account).filter(Account.email == data.email).first()
                 if existing:
@@ -39,12 +39,12 @@ class AuthQueries(BaseQueries):
                         status_code=status.HTTP_409_CONFLICT,
                         detail="An account with this email already exists."
                     )
-                
+
                 # Create Account
                 new_account = Account(
                     email=data.email,
                     password=get_password_hash(data.password),
-                    type="recruiter"
+                    type="company"
                 )
                 session.add(new_account)
                 session.flush()  # To get new_account.id
@@ -52,8 +52,7 @@ class AuthQueries(BaseQueries):
                 # Create Company
                 new_company = Company(
                     name=data.name,
-                    nip=data.nip,
-                    description=getattr(data, 'description', None)
+                    nip=data.nip
                 )
                 session.add(new_company)
                 session.flush()  # To get new_company.id
@@ -82,7 +81,7 @@ class AuthQueries(BaseQueries):
         except Exception as e:
             logger.error(f"Unexpected error during register_company: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
-        
+
     # Example Applicant registration (not fully implemented)
     def register_applicant(self, data):
         try:
@@ -113,7 +112,6 @@ class AuthQueries(BaseQueries):
                     surname=data.surname,
                     birth_date=getattr(data, 'birth_date', None),
                     # Add other applicant-specific fields here
-                    description=getattr(data, 'description', None),
                 )
                 session.add(new_applicant)
 
