@@ -57,6 +57,7 @@ app.include_router(applicant_router)
 app.include_router(company_router)
 app.include_router(job_router)
 app.include_router(tag_router)
+app.include_router(search_router)
 
 if __name__ == "__main__":
     uvicorn.run(

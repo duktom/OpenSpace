@@ -1,4 +1,3 @@
-from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from database.models import Applicant, Job, Company
 from database.database import get_db_session
