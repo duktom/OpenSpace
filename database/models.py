@@ -8,6 +8,7 @@ from sqlalchemy import (
     Date,
     ForeignKey,
     PrimaryKeyConstraint,
+    Text,
     and_,
 )
 from sqlalchemy.sql import func
@@ -35,6 +36,8 @@ class Account(Base):
     exp_date = Column(DateTime, nullable=True)
     is_verified = Column(Boolean, default=False)
     role = Column(String(50), nullable=True)
+    profile_img_link = Column(Text, nullable=True)
+    profile_img_id = Column(Text, nullable=True)
 
     # relationships
     applicant = relationship(
@@ -141,6 +144,8 @@ class Company(Base):
     name = Column(String(255), nullable=False)
     description = Column(String(255), nullable=True)
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
+    profile_img_link = Column(Text, nullable=True)
+    profile_img_id = Column(Text, nullable=True)
     nip = Column(String(10), unique=True, nullable=False)
 
     admins = relationship(
@@ -216,6 +221,8 @@ class Job(Base):
     description = Column(String, nullable=False)
     posting_date = Column(DateTime(timezone=True), server_default=func.now())
     expiry_date = Column(DateTime, nullable=True)
+    posting_img_link = Column(Text, nullable=True)
+    posting_img_id = Column(Text, nullable=True)
 
     company = relationship("Company", back_populates="jobs")
     poster = relationship("Recruiter", back_populates="jobs_posted")
