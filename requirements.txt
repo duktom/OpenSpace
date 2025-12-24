@@ -30,3 +30,11 @@ typing_extensions==4.15.0
 uvicorn==0.38.0
 cloudinary==1.41.0
 python-multipart==0.0.21
+
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt<4.1
+
+# Validation
+email-validator

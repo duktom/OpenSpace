@@ -1,5 +1,6 @@
 from sqlalchemy import (
     Column,
+    MetaData,
     String,
     Integer,
     Boolean,
@@ -13,7 +14,8 @@ from sqlalchemy import (
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, declarative_base, foreign, remote
 
-Base = declarative_base()
+metadata = MetaData()
+Base = declarative_base(metadata=metadata)
 
 
 # ======================
@@ -144,6 +146,7 @@ class Company(Base):
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     profile_img_link = Column(Text, nullable=True)
     profile_img_id = Column(Text, nullable=True)
+    nip = Column(String(10), unique=True, nullable=False)
 
     admins = relationship(
         "CompanyAdmin",

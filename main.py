@@ -13,6 +13,7 @@ from core.api.applicant_crud import router as applicant_router
 from core.api.company_crud import router as company_router
 from core.api.job_crud import router as job_router
 from core.api.tag_crud import router as tag_router
+from core.api.search_crud import router as search_router
 
 from core.services.debug_service.logger_config import get_logger
 
@@ -56,6 +57,7 @@ app.include_router(applicant_router)
 app.include_router(company_router)
 app.include_router(job_router)
 app.include_router(tag_router)
+app.include_router(search_router)
 
 if __name__ == "__main__":
     uvicorn.run(

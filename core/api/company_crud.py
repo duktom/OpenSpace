@@ -2,7 +2,6 @@ from fastapi import APIRouter,UploadFile, File
 
 from database.models import Company
 from database.schemas.company_schema import CompanySchemaPUT
-from database.schemas.company_schema import CompanySchemaPOST
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
 
@@ -20,11 +19,6 @@ async def get_company_by_id(id: int):
 @router.get("/")
 async def get_all_companies():
     return service.get_all_with_relations()
-
-
-@router.post("/add/")
-async def add_company(schema: CompanySchemaPOST):
-    return service.post_record(schema)
 
 
 @router.put("/edit/")
