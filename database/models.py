@@ -64,8 +64,8 @@ class Applicant(Base):
     id = Column(Integer, primary_key=True, index=True)
     account_id = Column(Integer, ForeignKey("account.id"), unique=True, nullable=False)
 
-    name = Column(String(50), nullable=False)
-    surname = Column(String(50), nullable=False)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
     birth_date = Column(Date, nullable=True)
     description = Column(String(255), nullable=True)
 
@@ -146,7 +146,7 @@ class Company(Base):
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     profile_img_link = Column(Text, nullable=True)
     profile_img_id = Column(Text, nullable=True)
-    nip = Column(String(10), unique=True, nullable=False)
+    ein = Column(String(10), unique=True, nullable=False)
 
     admins = relationship(
         "CompanyAdmin",
@@ -191,8 +191,8 @@ class Recruiter(Base):
     account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
     company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
 
-    recruiter_name = Column(String(50), nullable=False)
-    recruiter_surname = Column(String(50), nullable=False)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
     join_date = Column(DateTime(timezone=True), server_default=func.now())
 
     account = relationship("Account", back_populates="recruiters")

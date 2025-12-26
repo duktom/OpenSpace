@@ -1,12 +1,12 @@
 ## Database Notes / Migrations
 
-### Company NIP column
+### Company EIN column
 
 On **2025-12-19**, a new column was added manually to the `company` table:
 
-- Column name: `nip`
+- Column name: `ein`
 - Type: `VARCHAR(10)`
-- Purpose: Polish company tax identifier (NIP)
+- Purpose: Polish company tax identifier (EIN)
 
 This change was applied **manually** in the local development database and is
 **not yet covered by an automated migration**.

@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict
 class ApplicantSchemaGET(BaseModel):
     id: int
     account_id: int
-    name: str
-    surname: str
+    first_name: str
+    last_name: str
     birth_date: date
     description: str
 
@@ -15,15 +15,15 @@ class ApplicantSchemaGET(BaseModel):
 
 
 class ApplicantSchemaPOST(BaseModel):
-    name: str
-    surname: str
+    first_name: str
+    last_name: str
     birth_date: date
     description: str
 
 
 class ApplicantSchemaPUT(BaseModel):
     id: int
-    name: str
-    surname: str
+    first_name: str
+    last_name: str
     birth_date: date
     description: str

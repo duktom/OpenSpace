@@ -52,7 +52,7 @@ class AuthQueries(BaseQueries):
                 # Create Company
                 new_company = Company(
                     name=data.name,
-                    nip=data.nip
+                    ein=data.ein
                 )
                 session.add(new_company)
                 session.flush()  # To get new_company.id
@@ -108,8 +108,8 @@ class AuthQueries(BaseQueries):
 
                 new_applicant = Applicant(
                     account_id=new_account.id,
-                    name=data.name,
-                    surname=data.surname,
+                    first_name=data.first_name,
+                    last_name=data.last_name,
                     birth_date=getattr(data, 'birth_date', None),
                     # Add other applicant-specific fields here
                 )
