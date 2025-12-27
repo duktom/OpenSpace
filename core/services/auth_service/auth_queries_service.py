@@ -33,11 +33,22 @@ class AuthQueries(BaseQueries):
         try:
             with db_session_scope(commit=True) as session:
                 # Check email uniqueness
-                existing = session.query(Account).filter(Account.email == data.email).first()
-                if existing:
+                existing_email = (
+                    session.query(Account).filter(Account.email == data.email).first()
+                )
+                if existing_email:
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail="An account with this email already exists."
+                        detail="An account with this email already exists.",
+                    )
+                # Check ein uniqueness
+                existing_ein = (
+                    session.query(Company).filter(Company.ein == data.ein).first()
+                )
+                if existing_ein:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="An account with this EIN already exists.",
                     )
 
                 # Create Account
@@ -70,8 +81,7 @@ class AuthQueries(BaseQueries):
                 }
         except IntegrityError:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Email already in use."
+                status_code=status.HTTP_409_CONFLICT, detail="Unknown integrity error."
             )
         except MissingDatabaseError as e:
             logger.error(f"Database error during register_company: {e}")
@@ -121,8 +131,7 @@ class AuthQueries(BaseQueries):
                 }
         except IntegrityError:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Email already in use."
+                status_code=status.HTTP_409_CONFLICT, detail="Unknown integrity error."
             )
 
         except MissingDatabaseError as e:
