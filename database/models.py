@@ -3,6 +3,7 @@ from sqlalchemy import (
     MetaData,
     String,
     Integer,
+    Float,
     Boolean,
     DateTime,
     Date,
@@ -222,9 +223,9 @@ class Job(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     posting_date = Column(DateTime(timezone=True), server_default=func.now())
-    expiry_date = Column(DateTime, nullable=True)
     posting_img_link = Column(Text, nullable=True)
     posting_img_id = Column(Text, nullable=True)
+    price = Column(Float, nullable=False)
 
     company = relationship("Company", back_populates="jobs")
     poster = relationship("Recruiter", back_populates="jobs_posted")

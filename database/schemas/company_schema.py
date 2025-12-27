@@ -28,3 +28,8 @@ class CompanySchemaPUT(BaseModel):
     id: int
     name: str
     description: Optional[str]
+
+
+class CompanyDetailsSchema(BaseModel):
+    name: str
+    address: AddressSchema
