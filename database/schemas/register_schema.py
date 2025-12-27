@@ -1,6 +1,8 @@
 from datetime import date
 from pydantic import BaseModel, EmailStr, Field
 
+from database.schemas.company_schema import AddressSchema
+
 
 class RegisterCompanySchema(BaseModel):
     email: EmailStr
@@ -10,11 +12,11 @@ class RegisterCompanySchema(BaseModel):
         description="Password must be between 8 and 128 characters long."
     )
     name: str = Field(min_length=2, max_length=50, pattern="^[a-zA-ZĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
-    # Add Nip field for company identification number
     nip: str = Field(
         pattern=r"^\d{10}$",
         description="NIP must be exactly 10 characters long."
     )
+    address: AddressSchema
 
 
 class RegisterApplicantSchema(BaseModel):

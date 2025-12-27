@@ -1,7 +1,17 @@
+from typing import Optional
+
 from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
+
+
+class AddressSchema(BaseModel):
+    street: str
+    city: str
+    postal_code: str
+    building_number: str
+    apartament_number: Optional[str]
 
 
 class CompanySchemaGET(BaseModel):
@@ -12,13 +22,6 @@ class CompanySchemaGET(BaseModel):
     creation_date: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class CompanySchemaPOST(BaseModel):
-    email: str
-    password: str
-    name: str
-    description: str
 
 
 class CompanySchemaPUT(BaseModel):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from database.models import Applicant
+from database.schemas.applicant_schema import ApplicantSchemaGET
 from database.schemas.applicant_schema import ApplicantSchemaPUT
 from core.services.queries_service.base_queries import BaseQueries
 
@@ -8,14 +9,14 @@ router = APIRouter(prefix="/applicant", tags=["Applicants"])
 service = BaseQueries(Applicant)
 
 
-@router.get("/{id}/")
-async def get_aaplicant_by_id(id: int):
-    return service.get_by_id(id)
-
-
-@router.get("/")
+@router.get("/", response_model=list[ApplicantSchemaGET])
 async def get_all_applicants():
     return service.get_all_with_relations()
+
+
+@router.get("/{id}/", response_model=ApplicantSchemaGET)
+async def get_aaplicant_by_id(id: int):
+    return service.get_by_id(id)
 
 
 @router.put("/edit/")

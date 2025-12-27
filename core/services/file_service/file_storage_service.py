@@ -1,13 +1,8 @@
 import logging
-from fastapi import Query,HTTPException, APIRouter, Response, Depends,UploadFile, File
-from pydantic import BaseModel
-from sqlalchemy.exc import IntegrityError,NoResultFound
+from fastapi import HTTPException, UploadFile, File
 from sqlalchemy.sql import exists
-from sqlalchemy import inspect
-from database import db_session_scope, MissingDatabaseError
-from database.models import Account,Company,Job
+from database import db_session_scope
 from core.services.file_service.file_config import OBJECT_CONFIG
-from cloudinary.utils import cloudinary_url
 from cloudinary.uploader import upload
 from cloudinary.uploader import destroy
 
@@ -37,7 +32,7 @@ class ImageService:
 
         return config
 
-    def record_exists(self,model, object_id: int) -> bool:
+    def record_exists(self, model, object_id: int) -> bool:
         with db_session_scope(commit=False) as session:
             return session.query(
                 exists().where(model.id == object_id)
@@ -54,7 +49,7 @@ class ImageService:
                 status_code=500,
                 detail="Only image files are allowed on this endpoint"
             )
-        
+
         if self.record_exists(self.model, object_id):
 
             try:
@@ -65,8 +60,8 @@ class ImageService:
                 )
 
                 with db_session_scope(commit=True) as session:
-                    column = getattr(self.model,self.config["column"])
-                    column_id = getattr(self.model,self.config["img_id"])
+                    column = getattr(self.model, self.config["column"])
+                    column_id = getattr(self.model, self.config["img_id"])
 
                     session.query(self.model).filter(
                         self.model.id == object_id
@@ -74,7 +69,7 @@ class ImageService:
                         {column: result["secure_url"],
                          column_id: result["public_id"]}
                     )
-            
+
                 return {
                     "url": result["secure_url"]
                 }
@@ -86,11 +81,10 @@ class ImageService:
                 )
         else:
             raise HTTPException(
-            status_code=404,
-            detail="No record found based on data provided!")
+                status_code=404,
+                detail="No record found based on data provided!")
 
-    
-    def get_object_image(self,object_id: int):
+    def get_object_image(self, object_id: int):
 
         mapped_column = self.config["column"]
 
@@ -106,15 +100,14 @@ class ImageService:
             )
 
         return getattr(obj, mapped_column)
-    
-    def delete_from_cloudinary(self,public_id: str):
+
+    def delete_from_cloudinary(self, public_id: str):
         result = destroy(public_id)
 
         if result.get("result") != "ok":
-            raise RuntimeError("Failed to delete image from Cloudinary")   
-    
-            
-    def delete_object_image(self,object_id: int):
+            raise RuntimeError("Failed to delete image from Cloudinary")
+
+    def delete_object_image(self, object_id: int):
 
         with db_session_scope(commit=True) as session:
             obj = session.query(self.model).filter(
@@ -138,5 +131,3 @@ class ImageService:
             setattr(obj, self.config["img_id"], None)
 
             return {"message": "Image deleted successfully"}
-    
-

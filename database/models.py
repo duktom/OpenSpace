@@ -9,10 +9,11 @@ from sqlalchemy import (
     ForeignKey,
     PrimaryKeyConstraint,
     Text,
-    and_,
+    and_
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, declarative_base, foreign, remote
+from sqlalchemy.dialects.postgresql import JSONB
 
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
@@ -147,6 +148,7 @@ class Company(Base):
     profile_img_link = Column(Text, nullable=True)
     profile_img_id = Column(Text, nullable=True)
     nip = Column(String(10), unique=True, nullable=False)
+    address = Column(JSONB, nullable=False)
 
     admins = relationship(
         "CompanyAdmin",
