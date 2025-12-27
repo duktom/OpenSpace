@@ -27,4 +27,4 @@ class CompanySchemaGET(BaseModel):
 class CompanySchemaPUT(BaseModel):
     id: int
     name: str
-    description: str
+    description: Optional[str]

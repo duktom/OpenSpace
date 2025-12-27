@@ -1,4 +1,7 @@
+from typing import Optional
+
 from datetime import datetime
+
 from pydantic import BaseModel
 from pydantic import ConfigDict
 
@@ -8,7 +11,7 @@ class AccountSchemaGET(BaseModel):
     email: str
     type: str | None = None
     creation_date: datetime
-    exp_date: datetime
+    exp_date: Optional[datetime]
     is_verified: bool
 
     model_config = ConfigDict(from_attributes=True)
@@ -25,3 +28,13 @@ class AccountSchemaPUT(BaseModel):
     password: str
     type: str | None = None
     is_email_verified: bool
+
+class AccountVerifySchema(BaseModel):
+    email: str
+    type: str
+    is_verified: bool
+
+
+class LoginResponseSchema(BaseModel):
+    access_token: str
+    account: AccountVerifySchema

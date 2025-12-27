@@ -55,7 +55,7 @@ def get_current_account(
         token = request.cookies.get(COOKIE_NAME)
 
     if not token:
-        raise HTTPException(status_code=401, detail="NOT AUTHORIZED")
+        raise HTTPException(status_code=401, detail="YOU NEED TO LOGIN")
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

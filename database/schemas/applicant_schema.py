@@ -1,3 +1,5 @@
+from typing import Optional
+
 from datetime import date
 
 from pydantic import BaseModel, ConfigDict
@@ -9,7 +11,7 @@ class ApplicantSchemaGET(BaseModel):
     name: str
     surname: str
     birth_date: date
-    description: str
+    description: Optional[str]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -18,7 +20,7 @@ class ApplicantSchemaPOST(BaseModel):
     name: str
     surname: str
     birth_date: date
-    description: str
+    description: Optional[str]
 
 
 class ApplicantSchemaPUT(BaseModel):
@@ -26,4 +28,4 @@ class ApplicantSchemaPUT(BaseModel):
     name: str
     surname: str
     birth_date: date
-    description: str
+    description: Optional[str]

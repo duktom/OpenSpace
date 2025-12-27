@@ -1,3 +1,5 @@
+from typing import Optional
+
 from datetime import datetime
 
 from pydantic import BaseModel
@@ -15,9 +17,9 @@ class TagSchemaGET(BaseModel):
 
 class TagSchemaPOST(BaseModel):
     name: str
-    desc: str
+    desc: Optional[str]
 
 
 class TagSchemaPUT(BaseModel):
     name: str
-    desc: str
+    desc: Optional[str]

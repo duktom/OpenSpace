@@ -1,6 +1,8 @@
-from datetime import date
-from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
+from datetime import date
+
+from pydantic import BaseModel, EmailStr, Field
 from database.schemas.company_schema import AddressSchema
 
 
@@ -16,7 +18,7 @@ class RegisterCompanySchema(BaseModel):
         pattern=r"^\d{10}$",
         description="NIP must be exactly 10 characters long."
     )
-    address: AddressSchema
+    address: Optional[AddressSchema]
 
 
 class RegisterApplicantSchema(BaseModel):

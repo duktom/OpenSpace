@@ -11,6 +11,7 @@ router = APIRouter(prefix="/company", tags=["Company"])
 service = BaseQueries(Company)
 image_service = ImageService(Company)
 
+
 @router.get("/", response_model=list[CompanySchemaGET])
 async def get_all_companies():
     return service.get_all_with_relations()

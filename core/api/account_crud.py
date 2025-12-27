@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Response, Depends, UploadFile, File
+from fastapi import APIRouter, HTTPException, Response, Depends, UploadFile, File, Request
 
 from database.models import Account
 from database.schemas.account_schema import AccountSchemaGET
 from database.schemas.account_schema import AccountSchemaPOST
 from database.schemas.account_schema import AccountSchemaPUT
+from database.schemas.account_schema import LoginResponseSchema
 from database.schemas.register_schema import RegisterApplicantSchema
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
@@ -31,13 +32,13 @@ async def get_all_accounts():
     return service.get_all_with_relations()
 
 
-@router.get("/me/", response_model=AccountSchemaGET)
+@router.get("/me/", response_model=LoginResponseSchema)
 def read_user_me(response: Response, current_account: Account = Depends(get_current_account)):
     access_token = create_access_token(data={"sub": current_account.email})
     set_auth_cookie(response, access_token)
     return {
         "access_token": access_token,
-        "message": "AUTHENTICATED"
+        "account": current_account
     }
 
 
@@ -62,12 +63,14 @@ async def login(credentials: AccountSchemaPOST, response: Response):
 
     return {
         "access_token": access_token,
-        "message": "LOGIN SUCCESSFULLY"
+        "account": "LOGIN SUCCESSFULLY"
     }
 
 
 @router.post("/logout/")
-async def logout(response: Response):
+async def logout(request: Request, response: Response):
+    if "access_token" not in request.cookies:
+        raise HTTPException(status_code=400, detail="ALLREADY_LOGGED_OUT")
     response.delete_cookie(key=COOKIE_NAME)
     return {"message": "LOGOUT SUCCESSFULLY"}
 
