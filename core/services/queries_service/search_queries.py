@@ -13,8 +13,8 @@ class SearchQueries:
         # Ludzie
         people = self.db.query(Applicant).filter(
             or_(
-                Applicant.name.ilike(search_filter),
-                Applicant.surname.ilike(search_filter)
+                Applicant.first_name.ilike(search_filter),
+                Applicant.last_name.ilike(search_filter)
             )
         ).all()
 

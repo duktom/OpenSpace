@@ -14,10 +14,7 @@ class RegisterCompanySchema(BaseModel):
         description="Password must be between 8 and 128 characters long."
     )
     name: str = Field(min_length=2, max_length=50, pattern="^[a-zA-ZĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
-    nip: str = Field(
-        pattern=r"^\d{10}$",
-        description="NIP must be exactly 10 characters long."
-    )
+    ein: str = Field(pattern=r"^\d{10}$", description="EIN must be exactly 10 characters long.")
     address: Optional[AddressSchema]
 
 
@@ -28,7 +25,7 @@ class RegisterApplicantSchema(BaseModel):
         max_length=50,
         description="Password must be between 8 and 128 characters long."
     )
-    name: str = Field(min_length=2, max_length=30, pattern="^[a-zA-ZĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
-    surname: str = Field(min_length=2, max_length=30, pattern="^[a-zA-ZĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
+    first_name: str = Field(min_length=2, max_length=30, pattern="^[a-zA-ZĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
+    last_name: str = Field(min_length=2, max_length=30, pattern="^[a-zA-ZĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
 
     birth_date: date | None = None
