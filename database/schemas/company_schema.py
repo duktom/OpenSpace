@@ -8,7 +8,7 @@ class CompanySchemaGET(BaseModel):
     id: int
     name: str
     description: str
-    nip: str | None = None
+    ein: str | None = None
     creation_date: datetime
 
     model_config = ConfigDict(from_attributes=True)
