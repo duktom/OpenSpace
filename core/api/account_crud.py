@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, Response, Depends
 
 from database.models import Account
+from database.schemas.account_schema import AccountSchemaGET
 from database.schemas.account_schema import AccountSchemaPOST
 from database.schemas.account_schema import AccountSchemaPUT
 from database.schemas.register_schema import RegisterApplicantSchema
 from core.services.queries_service.base_queries import BaseQueries
 
 from core.services.auth_service.auth_queries_service import AuthQueries
-
 
 from core.services.auth_service.auth_config import (
     set_auth_cookie,
@@ -24,17 +24,17 @@ service = BaseQueries(Account)
 auth_service = AuthQueries()
 
 
-@router.get("/")
+@router.get("/", response_model=list[AccountSchemaGET])
 async def get_all_accounts():
     return service.get_all_with_relations()
 
 
-@router.get("/{id}/")
+@router.get("/{id}/", response_model=AccountSchemaGET)
 async def get_account_by_id(id: int):
     return service.get_by_id(id)
 
 
-@router.get("/me/")
+@router.get("/me/", response_model=AccountSchemaGET)
 def read_user_me(response: Response, current_account: Account = Depends(get_current_account)):
     access_token = create_access_token(data={"sub": current_account.email})
     set_auth_cookie(response, access_token)

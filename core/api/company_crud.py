@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File
 
 from database.models import Company
+from database.schemas.company_schema import CompanySchemaGET
 from database.schemas.company_schema import CompanySchemaPUT
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
@@ -11,12 +12,12 @@ service = BaseQueries(Company)
 image_service = ImageService(Company)
 
 
-@router.get("/")
+@router.get("/", response_model=list[CompanySchemaGET])
 async def get_all_companies():
     return service.get_all_with_relations()
 
 
-@router.get("/{id}/")
+@router.get("/{id}/", response_model=CompanySchemaGET)
 async def get_company_by_id(id: int):
     return service.get_by_id(id)
 
