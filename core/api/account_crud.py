@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, Depends,UploadFile, File
+from fastapi import APIRouter, HTTPException, Response, Depends, UploadFile, File
 
 from database.models import Account
 from database.schemas.account_schema import AccountSchemaPOST
@@ -97,22 +97,13 @@ async def edit_account(schema: AccountSchemaPUT):
 async def delete_account(id: int):
     return service.delete_record(id)
 
-@router.post(
-    "/image/{object_id}",
-    summary="Upload image for an account",
-)
-async def upload_object_image(
-    object_id: int,
-    file: UploadFile = File(...)
-):
-    return image_service.upload_object_image(
-        object_id,
-        file
-    )
 
-@router.get(
-        "/image/{object_id}",
-        summary="Return image for an account")
+@router.post("/image/{object_id}", summary="Upload image for an account",)
+async def upload_object_image(object_id: int, file: UploadFile = File(...)):
+    return image_service.upload_object_image(object_id, file)
+
+
+@router.get("/image/{object_id}", summary="Return image for an account")
 async def get_object_image(object_id: int):
     return image_service.get_object_image(object_id)
 
