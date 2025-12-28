@@ -4,6 +4,7 @@ from database.models import Job
 from database.schemas.job_schema import JobSchemaGET
 from database.schemas.job_schema import JobSchemaPOST
 from database.schemas.job_schema import JobSchemaPUT
+
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
 

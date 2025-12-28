@@ -54,11 +54,14 @@ class BaseQueries:
     def get_by_id(self, id: int):
         try:
             with db_session_scope(commit=False) as session:
-                return (
+                result = (
                     session.query(self.model)
                     .filter(self.model.id == id)
                     .first()
                 )
+                if result is None:
+                   raise HTTPException(status_code=404, detail="Object not found")
+                return result
         except MissingDatabaseError:
             logger.error("Database for provided object does not exist")
             raise HTTPException(404)

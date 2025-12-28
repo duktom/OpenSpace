@@ -6,20 +6,24 @@ from pydantic import ConfigDict
 
 class JobSchemaGET(BaseModel):
     id: int
-    name: str
-    desc: str
-    creation_date: datetime
     company_id: int
-    exp_date: datetime
+    recruiter_id: int
+    title: str
+    payoff: float
+    description: str
+    posting_date: datetime
+    expiry_date: datetime | None = None
+    posting_img_id: str | None = None
+    posting_img_link: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class JobSchemaPOST(BaseModel):
-    name: str
-    desc: str
+    title: str
+    description: str
 
 
 class JobSchemaPUT(BaseModel):
-    name: str
-    desc: str
+    title: str
+    description: str

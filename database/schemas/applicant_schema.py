@@ -9,7 +9,9 @@ class ApplicantSchemaGET(BaseModel):
     first_name: str
     last_name: str
     birth_date: date
-    description: str
+    description: str | None = None
+    profile_img_id: str | None = None
+    profile_img_link: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

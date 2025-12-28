@@ -17,17 +17,17 @@ async def get_all_companies():
     return service.get_all_with_relations()
 
 
-@router.get("/{id}/", response_model=CompanySchemaGET)
+@router.get("/profile/{id}/", response_model=CompanySchemaGET)
 async def get_company_by_id(id: int):
     return service.get_by_id(id)
 
 
-@router.get("/image/{object_id}", summary="Return image for a Company")
+@router.get("/image/{object_id}/", summary="Return image for a Company")
 async def get_object_image(object_id: int,):
     return image_service.get_object_image(object_id)
 
 
-@router.post("/image/{object_id}", summary="Upload image for a Company")
+@router.post("/image/{object_id}/", summary="Upload image for a Company")
 async def upload_object_image(object_id: int, file: UploadFile = File(...)):
     return image_service.upload_object_image(object_id, file)
 
@@ -42,6 +42,6 @@ async def delete_company(id: int):
     return service.delete_record(id)
 
 
-@router.delete("/image/delete/{object_id}", summary="Delete image for a Company")
+@router.delete("/image/delete/{object_id}/", summary="Delete image for a Company")
 async def delete_object_image(object_id: int):
     return image_service.delete_object_image(object_id)

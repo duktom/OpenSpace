@@ -8,7 +8,7 @@ class AccountSchemaGET(BaseModel):
     email: str
     type: str | None = None
     creation_date: datetime
-    exp_date: datetime
+    exp_date: datetime | None = None
     is_verified: bool
 
     model_config = ConfigDict(from_attributes=True)

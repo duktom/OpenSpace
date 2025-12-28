@@ -21,12 +21,12 @@ async def get_aaplicant_by_id(id: int):
     return service.get_by_id(id)
 
 
-@router.get("/image/{object_id}", summary="Return image for an Applicant")
+@router.get("/image/{object_id}/", summary="Return image for an Applicant")
 async def get_object_image(object_id: int):
     return image_service.get_object_image(object_id)
 
 
-@router.post("/image/{object_id}", summary="Upload image for an Applicant")
+@router.post("/image/{object_id}/", summary="Upload image for an Applicant")
 async def upload_object_image(object_id: int, file: UploadFile = File(...)):
     return image_service.upload_object_image(object_id, file)
 
