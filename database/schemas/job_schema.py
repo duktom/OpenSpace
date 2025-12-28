@@ -1,25 +1,45 @@
+from typing import Optional
+
 from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 
+from database.schemas.company_schema import CompanyJobOffertsSchema
 
-class JobSchemaGET(BaseModel):
-    id: int
-    name: str
-    desc: str
-    creation_date: datetime
-    company_id: int
-    exp_date: datetime
+
+class JobOffertsSchema(BaseModel):
+    title: str
+    company: CompanyJobOffertsSchema
+    payoff: float
+    posting_img_link: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class JobOffertSchema(JobOffertsSchema):
+    description: str
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class JobSchemaGET(JobOffertSchema):
+    id: int
+    company_id: int
+    recruiter_id: int
+    posting_img_id: str
+    posting_date: datetime
+    expiry_date: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+
 class JobSchemaPOST(BaseModel):
-    name: str
-    desc: str
+    title: str
+    description: str
 
 
 class JobSchemaPUT(BaseModel):
-    name: str
-    desc: str
+    title: str
+    description: str

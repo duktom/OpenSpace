@@ -10,9 +10,11 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     Text,
     and_,
+    Float
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, declarative_base, foreign, remote
+from sqlalchemy.dialects.postgresql import JSONB
 
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
@@ -143,6 +145,7 @@ class Company(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
     ein = Column(String(10), unique=True, nullable=False)
+    address = Column(JSONB, default={}, nullable=False)
     description = Column(String(255), nullable=True)
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     profile_img_id = Column(Text, nullable=True)
@@ -200,9 +203,9 @@ class Recruiter(Base):
 
     jobs_posted = relationship(
         "Job",
-        back_populates="poster",
+        back_populates="recruiter",
         cascade="all, delete-orphan",
-        foreign_keys="Job.poster_id",
+        foreign_keys="Job.recruiter_id",
     )
 
 
@@ -215,9 +218,10 @@ class Job(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
-    poster_id = Column(Integer, ForeignKey("recruiter.id"), nullable=False)
+    recruiter_id = Column(Integer, ForeignKey("recruiter.id"), nullable=False)
 
     title = Column(String, nullable=False)
+    payoff = Column(Float, nullable=False)
     description = Column(String, nullable=False)
     posting_date = Column(DateTime(timezone=True), server_default=func.now())
     expiry_date = Column(DateTime, nullable=True)
@@ -225,7 +229,7 @@ class Job(Base):
     posting_img_id = Column(Text, nullable=True)
 
     company = relationship("Company", back_populates="jobs")
-    poster = relationship("Recruiter", back_populates="jobs_posted")
+    recruiter = relationship("Recruiter", back_populates="jobs_posted")
 
     applicants = relationship(
         "JobApplicant",
