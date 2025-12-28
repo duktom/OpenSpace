@@ -3,8 +3,6 @@ from fastapi import APIRouter, UploadFile, File
 from database.models import Company
 from database.schemas.company_schema import CompanySchemaGET
 from database.schemas.company_schema import CompanySchemaPUT
-from database.schemas.company_schema import CompanyProfileSchema
-from database.schemas.company_schema import CompanyProfilesSchema
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
 
@@ -19,10 +17,7 @@ async def get_all_companies():
     return service.get_all_with_relations()
 
 
-@router.get("/profiles/", response_model=list[CompanyProfilesSchema])
-
-
-@router.get("/profile/{id}/", response_model=CompanyProfileSchema)
+@router.get("/profile/{id}/", response_model=CompanySchemaGET)
 async def get_company_by_id(id: int):
     return service.get_by_id(id)
 

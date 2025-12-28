@@ -4,8 +4,6 @@ from database.models import Job
 from database.schemas.job_schema import JobSchemaGET
 from database.schemas.job_schema import JobSchemaPOST
 from database.schemas.job_schema import JobSchemaPUT
-from database.schemas.job_schema import JobOffertSchema
-from database.schemas.job_schema import JobOffertsSchema
 
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
@@ -21,12 +19,7 @@ async def get_all_jobs():
     return service.get_all_with_relations()
 
 
-@router.get("/job_offerts", response_model=list[JobOffertsSchema])
-async def get_all_job_offerts():
-    return service.get_all_with_relations()
-
-
-@router.get("/{id}/", response_model=JobOffertSchema)
+@router.get("/{id}/", response_model=JobSchemaGET)
 async def get_job_by_id(id: int):
     return service.get_by_id(id)
 

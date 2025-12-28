@@ -14,32 +14,15 @@ class CompanyAddressSchema(BaseModel):
     apartment_num: Optional[str] = None
 
 
-class CompanyJobOffertsSchema(BaseModel):
-    name: str
-    address: CompanyAddressSchema
-
-
-class CompanyProfilesSchema(BaseModel):
-    name: str
-    creation_date: datetime
-    profile_img_link: str
-
-
-class CompanyProfileSchema(CompanyJobOffertsSchema):
-    creation_date: datetime
-    description: str
-    profile_img_link: str
-    
-
 class CompanySchemaGET(BaseModel):
     id: int
     name: str
-    ein: str | None = None
+    ein: str 
     address: CompanyAddressSchema
-    description: str
+    description: str | None = None
     creation_date: datetime
-    profile_img_id: str
-    profile_img_link: str
+    profile_img_id: str | None = None
+    profile_img_link: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
