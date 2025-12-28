@@ -9,14 +9,14 @@ router = APIRouter(prefix="/tags", tags=["Tags"])
 service = BaseQueries(Tag)
 
 
-@router.get("/{id}/")
-async def get_tag_by_id(id: int):
-    return service.get_by_id(id)
-
-
 @router.get("/")
 async def get_all_tags():
     return service.get_all_with_relations()
+
+
+@router.get("/{id}/")
+async def get_tag_by_id(id: int):
+    return service.get_by_id(id)
 
 
 @router.post("/add/")

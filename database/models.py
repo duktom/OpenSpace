@@ -36,8 +36,6 @@ class Account(Base):
     exp_date = Column(DateTime, nullable=True)
     is_verified = Column(Boolean, default=False)
     role = Column(String(50), nullable=True)
-    profile_img_link = Column(Text, nullable=True)
-    profile_img_id = Column(Text, nullable=True)
 
     # relationships
     applicant = relationship(
@@ -68,6 +66,8 @@ class Applicant(Base):
     last_name = Column(String(50), nullable=False)
     birth_date = Column(Date, nullable=True)
     description = Column(String(255), nullable=True)
+    profile_img_id = Column(Text, nullable=True)
+    profile_img_link = Column(Text, nullable=True)
 
     account = relationship("Account", back_populates="applicant")
 
@@ -142,11 +142,11 @@ class Company(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
+    ein = Column(String(10), unique=True, nullable=False)
     description = Column(String(255), nullable=True)
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
-    profile_img_link = Column(Text, nullable=True)
     profile_img_id = Column(Text, nullable=True)
-    ein = Column(String(10), unique=True, nullable=False)
+    profile_img_link = Column(Text, nullable=True)
 
     admins = relationship(
         "CompanyAdmin",

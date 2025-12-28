@@ -16,6 +16,7 @@ class ImageService:
         self.config = self._resolve_config()
 
     def _resolve_config(self):
+        print(f"DEBUG: Próba rozpoznania modelu: {self.model}")
         config = next(
             (
                 cfg for cfg in OBJECT_CONFIG.values()
