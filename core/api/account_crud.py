@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response, Depends
 
 from database.models import Account
-from database.schemas.account_schema import AccountSchemaGET
+from database.schemas.account_schema import AccountMeSchemaGET, AccountSchemaGET
 from database.schemas.account_schema import AccountSchemaPOST
 from database.schemas.account_schema import AccountSchemaPUT
 from database.schemas.register_schema import RegisterApplicantSchema
@@ -29,12 +29,7 @@ async def get_all_accounts():
     return service.get_all_with_relations()
 
 
-@router.get("/{id}/", response_model=AccountSchemaGET)
-async def get_account_by_id(id: int):
-    return service.get_by_id(id)
-
-
-@router.get("/me/", response_model=AccountSchemaGET)
+@router.get("/me/", response_model=AccountMeSchemaGET)
 def read_user_me(response: Response, current_account: Account = Depends(get_current_account)):
     access_token = create_access_token(data={"sub": current_account.email})
     set_auth_cookie(response, access_token)
@@ -43,6 +38,11 @@ def read_user_me(response: Response, current_account: Account = Depends(get_curr
         "access_token": access_token,
         "message": "AUTHENTICATED"
     }
+
+
+@router.get("/{id}/", response_model=AccountSchemaGET)
+async def get_account_by_id(id: int):
+    return service.get_by_id(id)
 
 
 @router.post("/login/")
