@@ -14,6 +14,11 @@ class AccountSchemaGET(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AccountMeSchemaGET(BaseModel):
+    access_token: str
+    message: str
+
+
 class AccountSchemaPOST(BaseModel):
     email: str
     password: str
