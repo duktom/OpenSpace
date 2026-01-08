@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from core.services.auth_service.auth_config import get_password_hash
 from core.services.queries_service.base_queries import BaseQueries
 
-from database.models import Account, Company, CompanyAdmin, Applicant
+from database.models import Account, Company, User
 from database import db_session_scope
 from database import MissingDatabaseError
 
@@ -68,12 +68,9 @@ class AuthQueries(BaseQueries):
                 session.add(new_company)
                 session.flush()  # To get new_company.id
 
-                # Link Account as CompanyAdmin
-                new_admin = CompanyAdmin(
-                    account_id=new_account.id,
-                    company_id=new_company.id
-                )
-                session.add(new_admin)
+                # company_admin link table removed — mark account type instead (schema change)
+                new_account.type = "admin"
+                session.add(new_account)
 
                 return {
                     "account_id": new_account.id,
@@ -116,18 +113,18 @@ class AuthQueries(BaseQueries):
                 session.add(new_account)
                 session.flush()  # To get new_account.id
 
-                new_applicant = Applicant(
+                new_user = User(
                     account_id=new_account.id,
                     first_name=data.first_name,
                     last_name=data.last_name,
                     birth_date=getattr(data, 'birth_date', None),
                     # Add other applicant-specific fields here
                 )
-                session.add(new_applicant)
+                session.add(new_user)
 
                 return {
                     "account_id": new_account.id,
-                    "applicant_id": getattr(new_applicant, "id", None),
+                    "user_id": getattr(new_user, "id", None),
                 }
         except IntegrityError:
             raise HTTPException(

@@ -4,4 +4,5 @@
 __pycache__/
 *.log
 .flake8
+.idea/.idea/
 .idea/
