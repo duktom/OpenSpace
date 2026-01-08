@@ -1,5 +1,5 @@
 from sqlalchemy import or_
-from database.models import User, Job, Company
+from database.models import Applicant, Job, Company
 from database.database import get_db_session
 
 
@@ -11,10 +11,10 @@ class SearchQueries:
         search_filter = f"{query}%"
 
         # Ludzie
-        people = self.db.query(User).filter(
+        people = self.db.query(Applicant).filter(
             or_(
-                User.first_name.ilike(search_filter),
-                User.last_name.ilike(search_filter)
+                Applicant.first_name.ilike(search_filter),
+                Applicant.last_name.ilike(search_filter)
             )
         ).all()
 

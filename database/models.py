@@ -10,7 +10,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     Text,
     and_,
-    Float,
+    Float
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, declarative_base, foreign, remote
@@ -21,7 +21,7 @@ Base = declarative_base(metadata=metadata)
 
 
 # ======================
-# ACCOUNT & USER
+# ACCOUNT & APPLICANT
 # ======================
 
 class Account(Base):
@@ -31,32 +31,38 @@ class Account(Base):
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
 
-    # e.g. "user" (historical values might exist; keep nullable)
+    # e.g. "applicant", "recruiter", "admin"
     type = Column(String(50), nullable=True)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())    
+    creation_date = Column(DateTime(timezone=True), server_default=func.now())
     exp_date = Column(DateTime, nullable=True)
     is_verified = Column(Boolean, default=False)
+    role = Column(String(50), nullable=True)
 
-    # relationships (1:1 Account -> User)
-    user = relationship(
-        "User",
+    # relationships
+    applicant = relationship(
+        "Applicant",
         back_populates="account",
         uselist=False,
         cascade="all, delete-orphan",
     )
+    recruiters = relationship(
+        "Recruiter",
+        back_populates="account",
+        cascade="all, delete-orphan",
+    )
+    company_admin_links = relationship(
+        "CompanyAdmin",
+        back_populates="account",
+        cascade="all, delete-orphan",
+    )
 
 
-class User(Base):
-    # IMPORTANT: Postgres reserved keyword handling
-    # Physical table name is exactly: "User"
-    __tablename__ = "User"
-    __table_args__ = {"quote": True}
+class Applicant(Base):
+    __tablename__ = "applicant"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("User.id"), nullable=False)
-    job_id = Column(Integer, ForeignKey("job.id"), nullable=False)
-
+    account_id = Column(Integer, ForeignKey("account.id"), unique=True, nullable=False)
 
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
@@ -65,31 +71,31 @@ class User(Base):
     profile_img_id = Column(Text, nullable=True)
     profile_img_link = Column(Text, nullable=True)
 
-    account = relationship("Account", back_populates="user")
+    account = relationship("Account", back_populates="applicant")
 
     work_experiences = relationship(
         "WorkExperience",
-        back_populates="user",
+        back_populates="applicant",
         cascade="all, delete-orphan",
     )
     educations = relationship(
         "Education",
-        back_populates="user",
+        back_populates="applicant",
         cascade="all, delete-orphan",
     )
     skills = relationship(
         "ApplicantSkill",
-        back_populates="user",
+        back_populates="applicant",
         cascade="all, delete-orphan",
     )
     job_applications = relationship(
-        "JobApplication",
-        back_populates="user",
+        "JobApplicant",
+        back_populates="applicant",
         cascade="all, delete-orphan",
     )
     favorites = relationship(
         "Favorites",
-        back_populates="user",
+        back_populates="applicant",
         cascade="all, delete-orphan",
     )
 
@@ -102,9 +108,7 @@ class WorkExperience(Base):
     __tablename__ = "work_experience"
 
     id = Column(Integer, primary_key=True, index=True)
-
-    # FK must reference quoted "User" table in Postgres
-    user_id = Column(Integer, ForeignKey("User.id"), nullable=False)
+    applicant_id = Column(Integer, ForeignKey("applicant.id"), nullable=False)
 
     job_title = Column(String(100), nullable=False)
     company_name = Column(String(100), nullable=False)
@@ -112,14 +116,14 @@ class WorkExperience(Base):
     end_date = Column(Date, nullable=True)
     description = Column(String(255), nullable=True)
 
-    user = relationship("User", back_populates="work_experiences")
+    applicant = relationship("Applicant", back_populates="work_experiences")
 
 
 class Education(Base):
     __tablename__ = "education"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("User.id"), nullable=False)
+    applicant_id = Column(Integer, ForeignKey("applicant.id"), nullable=False)
 
     school_name = Column(String(100), nullable=False)
     degree = Column(String(100), nullable=True)
@@ -128,11 +132,11 @@ class Education(Base):
     end_date = Column(Date, nullable=True)
     description = Column(String(255), nullable=True)
 
-    user = relationship("User", back_populates="educations")
+    applicant = relationship("Applicant", back_populates="educations")
 
 
 # ======================
-# COMPANY
+# COMPANY / ADMIN / RECRUITER
 # ======================
 
 class Company(Base):
@@ -143,21 +147,65 @@ class Company(Base):
     ein = Column(String(10), unique=True, nullable=False)
     address = Column(JSONB, default={}, nullable=False)
     description = Column(String(255), nullable=True)
-
-    # company timestamp column removed per requirements
-
+    creation_date = Column(DateTime(timezone=True), server_default=func.now())
     profile_img_id = Column(Text, nullable=True)
     profile_img_link = Column(Text, nullable=True)
 
+    admins = relationship(
+        "CompanyAdmin",
+        back_populates="company",
+        cascade="all, delete-orphan",
+    )
+    recruiters = relationship(
+        "Recruiter",
+        back_populates="company",
+        cascade="all, delete-orphan",
+    )
     jobs = relationship(
         "Job",
         back_populates="company",
         cascade="all, delete-orphan",
     )
-    favorites_by_users = relationship(
+    favorites_by_applicants = relationship(
         "Favorites",
         back_populates="company",
         cascade="all, delete-orphan",
+    )
+
+
+class CompanyAdmin(Base):
+    __tablename__ = "company_admin"
+
+    account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint("account_id", "company_id", name="pk_company_admin"),
+    )
+
+    account = relationship("Account", back_populates="company_admin_links")
+    company = relationship("Company", back_populates="admins")
+
+
+class Recruiter(Base):
+    __tablename__ = "recruiter"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
+
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    join_date = Column(DateTime(timezone=True), server_default=func.now())
+
+    account = relationship("Account", back_populates="recruiters")
+    company = relationship("Company", back_populates="recruiters")
+
+    jobs_posted = relationship(
+        "Job",
+        back_populates="recruiter",
+        cascade="all, delete-orphan",
+        foreign_keys="Job.recruiter_id",
     )
 
 
@@ -170,8 +218,7 @@ class Job(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
-
-    # poster/owner reference removed (table removed per requirements)
+    recruiter_id = Column(Integer, ForeignKey("recruiter.id"), nullable=False)
 
     title = Column(String, nullable=False)
     payoff = Column(Float, nullable=False)
@@ -182,9 +229,10 @@ class Job(Base):
     posting_img_link = Column(Text, nullable=True)
 
     company = relationship("Company", back_populates="jobs")
+    recruiter = relationship("Recruiter", back_populates="jobs_posted")
 
-    applications = relationship(
-        "JobApplication",
+    applicants = relationship(
+        "JobApplicant",
         back_populates="job",
         cascade="all, delete-orphan",
     )
@@ -199,33 +247,33 @@ class Job(Base):
     )
 
 
-class JobApplication(Base):
-    __tablename__ = "job_application"
+class JobApplicant(Base):
+    __tablename__ = "job_applicant"
 
-    user_id = Column(Integer, ForeignKey("User.id"), nullable=False)
+    applicant_id = Column(Integer, ForeignKey("applicant.id"), nullable=False)
     job_id = Column(Integer, ForeignKey("job.id"), nullable=False)
     application_date = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
-        PrimaryKeyConstraint("user_id", "job_id", name="pk_job_application"),
+        PrimaryKeyConstraint("applicant_id", "job_id", name="pk_job_applicant"),
     )
 
-    user = relationship("User", back_populates="job_applications")
-    job = relationship("Job", back_populates="applications")
+    applicant = relationship("Applicant", back_populates="job_applications")
+    job = relationship("Job", back_populates="applicants")
 
 
 class Favorites(Base):
     __tablename__ = "favorites"
 
     company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("User.id"), nullable=False)
+    applicant_id = Column(Integer, ForeignKey("applicant.id"), nullable=False)
 
     __table_args__ = (
-        PrimaryKeyConstraint("company_id", "user_id", name="pk_favorites"),
+        PrimaryKeyConstraint("company_id", "applicant_id", name="pk_favorites"),
     )
 
-    company = relationship("Company", back_populates="favorites_by_users")
-    user = relationship("User", back_populates="favorites")
+    company = relationship("Company", back_populates="favorites_by_applicants")
+    applicant = relationship("Applicant", back_populates="favorites")
 
 
 # ======================
@@ -238,8 +286,9 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(80), unique=True, nullable=False)
     description = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    user_skills = relationship(
+    creation_date = Column(DateTime(timezone=True), server_default=func.now())
+
+    applicant_skills = relationship(
         "ApplicantSkill",
         back_populates="tag",
         cascade="all, delete-orphan",
@@ -251,10 +300,10 @@ class Tag(Base):
     )
 
 
-class UserSkill(Base):
-    __tablename__ = "user_skill"
+class ApplicantSkill(Base):
+    __tablename__ = "applicant_skill"
 
-    user_id = Column(Integer, ForeignKey("User.id"), nullable=False)
+    applicant_id = Column(Integer, ForeignKey("applicant.id"), nullable=False)
     tag_id = Column(Integer, ForeignKey("tag.id"), nullable=False)
 
     name = Column(String(100), nullable=False)
@@ -264,17 +313,17 @@ class UserSkill(Base):
     proficiency = Column(Integer, nullable=True)  # e.g. 1–5
 
     __table_args__ = (
-        PrimaryKeyConstraint("user_id", "tag_id", name="pk_user_skill"),
+        PrimaryKeyConstraint("applicant_id", "tag_id", name="pk_applicant_skill"),
     )
 
-    user = relationship("User", back_populates="skills")
-    tag = relationship("Tag", back_populates="user_skills")
+    applicant = relationship("Applicant", back_populates="skills")
+    tag = relationship("Tag", back_populates="applicant_skills")
 
 
 class EntityTag(Base):
     """
-    Generic tag assignment: can connect a tag to a job, company, user, etc.
-    entity_type holds values like: 'job', 'company', 'user'
+    Generic tag assignment: can connect a tag to a job, company, applicant, etc.
+    entity_type holds values like: 'job', 'company', 'applicant'
     """
     __tablename__ = "entity_tag"
 

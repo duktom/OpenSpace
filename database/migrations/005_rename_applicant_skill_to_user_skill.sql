@@ -1,1 +1,0 @@
-ALTER TABLE applicant_skill RENAME TO user_skill;
