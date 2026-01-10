@@ -20,7 +20,7 @@ class CompanySchemaGET(BaseModel):
     ein: str 
     address: CompanyAddressSchema
     description: str | None = None
-    creation_date: datetime
+    creation_date: Optional[datetime] = None
     profile_img_id: str | None = None
     profile_img_link: str | None = None
 
