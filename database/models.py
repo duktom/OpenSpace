@@ -45,6 +45,18 @@ class Account(Base):
         passive_deletes=True,
     )
 
+    company_recruiters = relationship(
+        "CompanyRecruiter",
+        back_populates="account",
+        cascade="all, delete-orphan",
+    )
+
+    admin_company = relationship(
+        "Company",
+        back_populates="admin_account",
+        uselist=False,
+    )
+
 
 class User(Base):
     __tablename__ = "user"
@@ -146,7 +158,13 @@ class Company(Base):
     ein = Column(String(10), unique=True, nullable=False)
     address = Column(JSONB, default={}, nullable=False)
     description = Column(String(255), nullable=True)
-
+    account_id = Column(
+        Integer,
+        ForeignKey("account.id", ondelete="RESTRICT"),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
     # company timestamp column removed per requirements
 
     profile_img_id = Column(Text, nullable=True)
@@ -163,6 +181,32 @@ class Company(Base):
         cascade="all, delete-orphan",
     )
 
+    admin_account = relationship(
+        "Account",
+        back_populates="admin_company",
+        uselist=False,
+    )
+
+    recruiters = relationship(
+        "CompanyRecruiter",
+        back_populates="company",
+        cascade="all, delete-orphan",
+    )
+
+
+class CompanyRecruiter(Base):
+    __tablename__ = "company_recruiter"
+
+    account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
+    join_date = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        PrimaryKeyConstraint("account_id", "company_id", name="pk_company_recruiter"),
+    )
+
+    account = relationship("Account", back_populates="company_recruiters")
+    company = relationship("Company", back_populates="recruiters")
 
 # ======================
 # JOBS & APPLICATIONS
@@ -298,3 +342,5 @@ class EntityTag(Base):
         viewonly=True,
         foreign_keys=lambda: [EntityTag.entity_id],
     )
+
+
