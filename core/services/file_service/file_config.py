@@ -9,9 +9,9 @@ cloudinary.config(
 )
 
 OBJECT_CONFIG = {
-    "applicant": {
-        "model": "Applicant",
-        "folder": "applicant_prof_img",
+    "user": {
+        "model": "User",
+        "folder": "user_prof_img",
         "column": "profile_img_link",
         "img_id": "profile_img_id"
     },

@@ -1,5 +1,5 @@
 import logging
-from fastapi import HTTPException, UploadFile, File
+from fastapi import HTTPException
 from sqlalchemy.sql import exists
 from database import db_session_scope
 from database.models import Account, Company, CompanyRecruiter
@@ -34,30 +34,30 @@ class RecruiterService:
                 .all()
             )
         
-    def add_applicant_to_company_recruiters(self, company_id: int, applicant_account_id: int, current_account: Account) -> dict:
+    def add_user_to_company_recruiters(self, company_id: int, user_account_id: int, current_account: Account) -> dict:
         self._assert_admin_and_company_match(current_account, company_id)
 
         with db_session_scope(commit=True) as session:
-            applicant = session.query(Account).filter(Account.id == applicant_account_id).first()
-            if not applicant:
+            user = session.query(Account).filter(Account.id == user_account_id).first()
+            if not user:
                 raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
-            if (applicant.type or "").lower() != "applicant":
+            if (user.type or "").lower() != "applicant":
                 raise HTTPException(status_code=400, detail="ACCOUNT_NOT_APPLICANT")
 
             already = session.query(
                 exists().where(
-                    (CompanyRecruiter.account_id == applicant_account_id) &
+                    (CompanyRecruiter.account_id == user_account_id) &
                     (CompanyRecruiter.company_id == company_id)
                 )
             ).scalar()
             if already:
-                return {"status": "ok", "detail": "ALREADY_ASSIGNED", "company_id": company_id, "account_id": applicant_account_id}
+                return {"status": "ok", "detail": "ALREADY_ASSIGNED", "company_id": company_id, "account_id": user_account_id}
 
-            link = CompanyRecruiter(account_id=applicant_account_id, company_id=company_id)
+            link = CompanyRecruiter(account_id=user_account_id, company_id=company_id)
             session.add(link)
-            return {"status": "ok", "detail": "ASSIGNED", "company_id": company_id, "account_id": applicant_account_id}
+            return {"status": "ok", "detail": "ASSIGNED", "company_id": company_id, "account_id": user_account_id}
 
-    def list_company_applicants(self, company_id: int, current_account: Account) -> list[Account]:
+    def list_company_users(self, company_id: int, current_account: Account) -> list[Account]:
         self._assert_admin_and_company_match(current_account, company_id)
 
         with db_session_scope(commit=False) as session:
@@ -71,7 +71,7 @@ class RecruiterService:
                 .all()
             )
 
-    def remove_applicant_from_company_recruiters(self, company_id: int, applicant_account_id: int, current_account: Account) -> dict:
+    def remove_user_from_company_recruiters(self, company_id: int, user_account_id: int, current_account: Account) -> dict:
         self._assert_admin_and_company_match(current_account, company_id)
 
         with db_session_scope(commit=True) as session:
@@ -79,7 +79,7 @@ class RecruiterService:
                 session.query(CompanyRecruiter)
                 .filter(
                     CompanyRecruiter.company_id == company_id,
-                    CompanyRecruiter.account_id == applicant_account_id,
+                    CompanyRecruiter.account_id == user_account_id,
                 )
                 .first()
             )
@@ -87,4 +87,4 @@ class RecruiterService:
                 raise HTTPException(status_code=404, detail="ASSIGNMENT_NOT_FOUND")
 
             session.delete(link)
-            return {"status": "ok", "detail": "REMOVED", "company_id": company_id, "account_id": applicant_account_id}
+            return {"status": "ok", "detail": "REMOVED", "company_id": company_id, "account_id": user_account_id}

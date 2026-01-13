@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from core.services.auth_service.auth_config import get_password_hash
 from core.services.queries_service.base_queries import BaseQueries
 
-from database.models import Account, Company, CompanyAdmin, Applicant
+from database.models import Account, Company, CompanyRecruiter, User
 from database import db_session_scope
 from database import MissingDatabaseError
 
@@ -71,7 +71,7 @@ class AuthQueries(BaseQueries):
                 
 
                 # Link Account as CompanyAdmin
-                new_admin = CompanyAdmin(
+                new_admin = CompanyRecruiter(
                     account_id=new_account.id,
                     company_id=new_company.id
                 )
@@ -94,8 +94,8 @@ class AuthQueries(BaseQueries):
             logger.error(f"Unexpected error during register_company: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
-    # Example Applicant registration (not fully implemented)
-    def register_applicant(self, data):
+    # Example User registration (not fully implemented)
+    def register_user(self, data):
         try:
             with db_session_scope(commit=True) as session:
                 # Check email uniqueness
@@ -118,7 +118,7 @@ class AuthQueries(BaseQueries):
                 session.add(new_account)
                 session.flush()  # To get new_account.id
 
-                new_applicant = Applicant(
+                new_user = User(
                     account_id=new_account.id,
                     first_name=data.first_name,
                     last_name=data.last_name,
@@ -130,7 +130,7 @@ class AuthQueries(BaseQueries):
 
                 return {
                     "account_id": new_account.id,
-                    "applicant_id": getattr(new_applicant, "id", None),
+                    "user_id": getattr(new_user, "id", None),
                 }
         except IntegrityError:
             raise HTTPException(
@@ -138,11 +138,11 @@ class AuthQueries(BaseQueries):
             )
 
         except MissingDatabaseError as e:
-            logger.error(f"Database error during register_applicant: {e}")
+            logger.error(f"Database error during register_user: {e}")
             raise HTTPException(status_code=404)
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Unexpected error during register_applicant: {e}")
+            logger.error(f"Unexpected error during register_user: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
         

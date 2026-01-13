@@ -4,7 +4,7 @@ from database.models import Account
 from database.schemas.account_schema import AccountMeSchemaGET, AccountSchemaGET
 from database.schemas.account_schema import AccountSchemaPOST
 from database.schemas.account_schema import AccountSchemaPUT
-from database.schemas.register_schema import RegisterApplicantSchema
+from database.schemas.register_schema import RegisterUserSchema
 from core.services.queries_service.base_queries import BaseQueries
 
 from core.services.auth_service.auth_queries_service import AuthQueries
@@ -78,12 +78,12 @@ async def register_company(schema: RegisterCompanySchema):
 
 
 @router.post("/register/user/", status_code=201)
-async def register_applicant(schema: RegisterApplicantSchema):
-    created = auth_service.register_applicant(schema)
+async def register_user(schema: RegisterUserSchema):
+    created = auth_service.register_user(schema)
     return {
-        "msg": "Applicant account created successfully",
+        "msg": "User account created successfully",
         "account_id": created["account_id"],
-        "applicant_id": created["applicant_id"],
+        "user_id": created["user_id"],
     }
 
 

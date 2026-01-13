@@ -59,8 +59,8 @@ async def search_applicants_by_email(
     return recruiter_service.search_accounts_by_email(mail)
 
 
-@router.post("/{company_id}/recruiters/{account_id}/", summary="Assign applicant account to company (admin-only)")
-async def add_applicant_to_company_recruiter(
+@router.post("/{company_id}/recruiters/{account_id}/", summary="Assign user account to company (admin-only)")
+async def add_user_to_company_recruiter(
     company_id: int,
     account_id: int,
     current_account: Account = Depends(get_current_account),
@@ -69,14 +69,14 @@ async def add_applicant_to_company_recruiter(
     if (current_account.type or "").lower() != "admin":
         raise HTTPException(status_code=403, detail="FORBIDDEN")
 
-    return recruiter_service.add_applicant_to_company_recruiters(
+    return recruiter_service.add_user_to_company_recruiters(
         company_id=company_id,
-        applicant_account_id=account_id,
+        user_account_id=account_id,
         current_account=current_account,
     )
 
 
-@router.get("/{company_id}/recruiters/", summary="List applicant accounts assigned to company (admin-only)")
+@router.get("/{company_id}/recruiters/", summary="List user accounts assigned to company (admin-only)")
 async def list_company_recruiters(
     company_id: int,
     current_account: Account = Depends(get_current_account),
@@ -84,14 +84,14 @@ async def list_company_recruiters(
     if (current_account.type or "").lower() != "admin":
         raise HTTPException(status_code=403, detail="FORBIDDEN")
 
-    return recruiter_service.list_company_applicants(
+    return recruiter_service.list_company_users(
         company_id=company_id,
         current_account=current_account,
     )
 
 
-@router.delete("/{company_id}/recruiters/{account_id}/", summary="Remove applicant account from company (admin-only)")
-async def remove_applicant_from_company_recruiter(
+@router.delete("/{company_id}/recruiters/{account_id}/", summary="Remove user account from company (admin-only)")
+async def remove_user_from_company_recruiter(
     company_id: int,
     account_id: int,
     current_account: Account = Depends(get_current_account),
@@ -99,8 +99,8 @@ async def remove_applicant_from_company_recruiter(
     if (current_account.type or "").lower() != "admin":
         raise HTTPException(status_code=403, detail="FORBIDDEN")
 
-    return recruiter_service.remove_applicant_from_company_recruiters(
+    return recruiter_service.remove_user_from_company_recruiters(
         company_id=company_id,
-        applicant_account_id=account_id,
+        user_account_id=account_id,
         current_account=current_account,
     )

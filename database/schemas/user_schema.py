@@ -3,7 +3,7 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict
 
 
-class ApplicantSchemaGET(BaseModel):
+class UserSchemaGET(BaseModel):
     id: int
     account_id: int
     first_name: str
@@ -16,14 +16,14 @@ class ApplicantSchemaGET(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ApplicantSchemaPOST(BaseModel):
+class UserSchemaPOST(BaseModel):
     first_name: str
     last_name: str
     birth_date: date
     description: str
 
 
-class ApplicantSchemaPUT(BaseModel):
+class UserSchemaPUT(BaseModel):
     id: int
     first_name: str
     last_name: str
