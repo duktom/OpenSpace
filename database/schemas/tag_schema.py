@@ -8,7 +8,7 @@ class TagSchemaGET(BaseModel):
     id: int
     name: str
     description: str
-    creation_date: datetime
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -19,5 +19,6 @@ class TagSchemaPOST(BaseModel):
 
 
 class TagSchemaPUT(BaseModel):
+    id: int
     name: str
-    descdescription: str
+    description: str

@@ -7,7 +7,7 @@ class AccountSchemaGET(BaseModel):
     id: int
     email: str
     type: str | None = None
-    creation_date: datetime
+    created_at: datetime
     exp_date: datetime | None = None
     is_verified: bool
 
@@ -29,4 +29,4 @@ class AccountSchemaPUT(BaseModel):
     email: str
     password: str
     type: str | None = None
-    is_email_verified: bool
+    is_verified: bool

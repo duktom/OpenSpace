@@ -26,7 +26,7 @@ auth_service = AuthQueries()
 
 @router.get("/", response_model=list[AccountSchemaGET])
 async def get_all_accounts():
-    return service.get_all_with_relations()
+    return service.get_all()
 
 
 @router.get("/me/", response_model=AccountMeSchemaGET)

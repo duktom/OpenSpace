@@ -1,12 +1,11 @@
-from fastapi import APIRouter, UploadFile, File,Depends,HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from core.services.auth_service.auth_config import get_current_account
-from database.models import Company,Account
+from database.models import Company, Account
 from database.schemas.company_schema import CompanySchemaGET
 from database.schemas.company_schema import CompanySchemaPUT
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
 from core.services.recruiter_service.recruiter_service import RecruiterService
-
 
 router = APIRouter(prefix="/company", tags=["Company"])
 service = BaseQueries(Company)
@@ -47,6 +46,7 @@ async def delete_company(id: int):
 @router.delete("/image/delete/{object_id}/", summary="Delete image for a Company")
 async def delete_object_image(object_id: int):
     return image_service.delete_object_image(object_id)
+
 
 @router.get("/search-applicants")
 async def search_applicants_by_email(
