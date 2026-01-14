@@ -55,7 +55,7 @@ class AuthQueries(BaseQueries):
                 new_account = Account(
                     email=data.email,
                     password=get_password_hash(data.password),
-                    type="company"
+                    type="admin"
                 )
                 session.add(new_account)
                 session.flush()  # To get new_account.id
@@ -63,10 +63,12 @@ class AuthQueries(BaseQueries):
                 # Create Company
                 new_company = Company(
                     name=data.name,
-                    ein=data.ein
+                    ein=data.ein,
+                    account_id=new_account.id
                 )
                 session.add(new_company)
                 session.flush()  # To get new_company.id
+                
 
                 # Link Account as CompanyAdmin
                 new_admin = CompanyAdmin(
@@ -123,7 +125,8 @@ class AuthQueries(BaseQueries):
                     birth_date=getattr(data, 'birth_date', None),
                     # Add other applicant-specific fields here
                 )
-                session.add(new_applicant)
+                session.add(new_user)
+                session.flush() 
 
                 return {
                     "account_id": new_account.id,
@@ -142,3 +145,4 @@ class AuthQueries(BaseQueries):
         except Exception as e:
             logger.error(f"Unexpected error during register_applicant: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
+        
