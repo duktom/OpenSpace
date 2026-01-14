@@ -1,22 +1,22 @@
 from fastapi import APIRouter, UploadFile, File
 
-from database.models import User
-from database.schemas.applicant_schema import UserSchemaGET
-from database.schemas.applicant_schema import UserSchemaPUT
+from database.models import Applicant
+from database.schemas.applicant_schema import ApplicantSchemaGET
+from database.schemas.applicant_schema import ApplicantSchemaPUT
 from core.services.queries_service.base_queries import BaseQueries
 from core.services.file_service.file_storage_service import ImageService
 
-router = APIRouter(prefix="/user", tags=["Applicants"])
-service = BaseQueries(User)
-image_service = ImageService(User)
+router = APIRouter(prefix="/applicant", tags=["Applicants"])
+service = BaseQueries(Applicant)
+image_service = ImageService(Applicant)
 
 
-@router.get("/", response_model=list[UserSchemaGET])
+@router.get("/", response_model=list[ApplicantSchemaGET])
 async def get_all_applicants():
     return service.get_all_with_relations()
 
 
-@router.get("/{id}/", response_model=UserSchemaGET)
+@router.get("/{id}/", response_model=ApplicantSchemaGET)
 async def get_aaplicant_by_id(id: int):
     return service.get_by_id(id)
 
@@ -32,7 +32,7 @@ async def upload_object_image(object_id: int, file: UploadFile = File(...)):
 
 
 @router.put("/edit/")
-async def edit_applicant(schema: UserSchemaPUT):
+async def edit_applicant(schema: ApplicantSchemaPUT):
     return service.update_record(schema)
 
 

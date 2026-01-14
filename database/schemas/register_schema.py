@@ -17,7 +17,7 @@ class RegisterCompanySchema(BaseModel):
     )
 
 
-class RegisterUserSchema(BaseModel):
+class RegisterApplicantSchema(BaseModel):
     email: EmailStr
     password: str = Field(
         min_length=8,
