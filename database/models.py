@@ -33,7 +33,6 @@ class Account(Base):
 
     type = Column(String(50), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    exp_date = Column(DateTime, nullable=True)
     is_verified = Column(Boolean, default=False)
 
     # 1:1 Account -> user
