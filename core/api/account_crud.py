@@ -14,9 +14,14 @@ from core.services.auth_service.auth_config import (
     verify_password,
     create_access_token,
     get_current_account,
-    COOKIE_NAME
+    COOKIE_NAME,
+    needs_rehash,
+    hash_password,
 )
 from database.schemas.register_schema import RegisterCompanySchema
+
+from core.services.auth_service.auth_config import needs_rehash, hash_password
+
 
 
 router = APIRouter(prefix="/account", tags=["Accounts"])
@@ -51,6 +56,10 @@ async def login(credentials: AccountSchemaPOST, response: Response):
     if not account or not verify_password(credentials.password, account.password):
         raise HTTPException(
             status_code=401, detail="INCORRECT EMAIL OR PASSWORD")
+    
+    if needs_rehash(account.password):
+        new_hash = hash_password(credentials.password)
+        auth_service.update_account_password_hash(account.id, new_hash)
 
     access_token = create_access_token(data={"sub": account.email})
     set_auth_cookie(response, access_token)
