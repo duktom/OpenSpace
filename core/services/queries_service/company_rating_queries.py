@@ -38,25 +38,37 @@ class CompanyRatingQueriesService(BaseQueries):
         except MissingDatabaseError:
             raise HTTPException(500)
 
-    def create_rating_entry(self, company_id: int, user_id: int, score: int):
+    def upsert_rating_entry(self, company_id: int, user_id: int, score: int):
         try:
             with db_session_scope(commit=True) as session:
-                new_rating = CompanyRating(
-                    company_id=company_id,
-                    user_id=user_id,
-                    score=score
-                )
-                session.add(new_rating)
+                existing_rating = session.query(CompanyRating).filter(
+                    CompanyRating.company_id == company_id,
+                    CompanyRating.user_id == user_id
+                ).first()
 
                 company = session.query(Company).filter(Company.id == company_id).first()
                 if not company:
                     raise HTTPException(status_code=404, detail="Company not found")
 
                 old_count = company.ratings_count or 0
-                old_avg = company.rating or 0
+                old_avg = float(company.rating) if company.rating else 0.0
 
-                new_count = old_count + 1
-                new_avg = ((old_avg * old_count) + score) / new_count
+                if existing_rating:
+                    old_score = existing_rating.score
+                    existing_rating.score = score
+                    
+                    new_count = old_count
+                    new_avg = ((old_avg * old_count) - old_score + score) / new_count
+                else:
+                    new_rating = CompanyRating(
+                        company_id=company_id,
+                        user_id=user_id,
+                        score=score
+                    )
+                    session.add(new_rating)
+                    
+                    new_count = old_count + 1
+                    new_avg = ((old_avg * old_count) + score) / new_count
 
                 company.ratings_count = new_count
                 company.rating = new_avg
@@ -67,5 +79,39 @@ class CompanyRatingQueriesService(BaseQueries):
                     "ratings_count": new_count
                 }
         except Exception as e:
-            logger.error(f"Error while creating rating: {e}")
-            raise HTTPException(status_code=400, detail="Could not submit rating")
+            logger.error(f"Error during rating upsert: {e}")
+            raise HTTPException(status_code=500, detail="Could not process rating")
+
+    def delete_raing_entry(self, company_id: int, user_id: int):
+        try:
+            with db_session_scope(commit=True) as session:
+                rating_entry = session.query(CompanyRating).filter(
+                    CompanyRating.company_id == company_id,
+                    CompanyRating.user_id == user_id
+                ).first()
+
+                if not rating_entry:
+                    raise HTTPException(status_code=404, detail="Rating not found")
+                score_to_remove = rating_entry.score
+                session.delete(rating_entry)
+
+                company = session.query(Company).filter(Company.id == company_id).first()
+                if company and company.ratings_count > 0:
+                    old_count = company.ratings_count
+                    old_avg = float(company.rating)
+
+                    new_count = old_count -1
+
+                    if new_count > 0:
+                        new_avg = ((old_avg * old_count) - score_to_remove) / new_count
+                    else:
+                        new_avg = 0.0
+
+                    company.ratings_count = new_count
+                    company.rating = new_avg
+
+                return {"message": "Rating deleted successfully"}
+            
+        except Exception as e:
+            logger.error(f"Error during rating deletion: {e}")
+            raise HTTPException(status_code=500, detail="Could not delete rating")

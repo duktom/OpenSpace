@@ -21,24 +21,21 @@ class RatingService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Tylko kandydaci mogą wystawiać oceny firmom."
             )
-
+    
         user = self.queries.get_user_by_account_id(current_account.id)
 
-        existing_rating = self.queries.get_existing_rating(
-            company_id=company_id,
-            user_id=user.id
-        )
-
-        if existing_rating:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Już wystawiłeś ocenę tej firmie."
-            )
-
-        result = self.queries.create_rating_entry(
+        result = self.queries.upsert_rating_entry(
             company_id=company_id,
             user_id=user.id,
             score=rating_data.score
         )
 
         return result
+    
+    def remove_rating(self, company_id: int, current_account):
+        if current_account.type != "applicant":
+            raise HTTPException(status_code=403, detail="Forbidden")
+        
+        user = self.queries.get_user_by_account_id(current_account.id)
+
+        return self.queries.delete_raing_entry(company_id, user.id)

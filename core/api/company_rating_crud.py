@@ -11,9 +11,16 @@ from core.services.rating_service.company_rating_service import RatingService
 router = APIRouter(prefix="/company_rating", tags=["Ratings"])
 
 
-@router.post("/{company_id}/", response_model=RatingResponse)
+@router.post("/rate/{company_id}/", response_model=RatingResponse)
 def rate_company(company_id: int,
                  rating_data: RatingCreate,
                  current_account=Depends(get_current_account),
                  service: RatingService = Depends(RatingService)):
     return service.process_company_rating(company_id, rating_data, current_account)
+
+
+@router.delete("/delete_rate/{company_id/}")
+def delete_rating(company_id: int,
+                  current_account = Depends(get_current_account),
+                  service: RatingService = Depends(RatingService)):
+    return service.remove_rating(company_id, current_account)
