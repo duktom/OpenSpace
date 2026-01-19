@@ -27,6 +27,16 @@ class AuthQueries(BaseQueries):
         except MissingDatabaseError as e:
             logger.error(f"Database error during get_account_by_email: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
+        
+    def update_account_password_hash(self, account_id: int, new_hash: str) -> None:
+        try:
+            with db_session_scope(commit=True) as session:
+                account = session.query(Account).filter(Account.id == account_id).first()
+                if not account:
+                    raise HTTPException(status_code=404, detail="Account not found")
+        except MissingDatabaseError as e:
+            logger.error(f"Database error during update_account_password_hash: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     # Company registration
     def register_company(self, data):

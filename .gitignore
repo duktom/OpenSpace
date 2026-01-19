@@ -1,7 +1,15 @@
-.env
+# Virtualenv
+venv/
 .venv/
-.vscode/
+
+# Local database / sqlite
+*.sqlite
+*.db
+
+# Python cache
 __pycache__/
-*.log
-.flake8
-.idea/
+*.pyc
+*.pyo
+
+# Environment files
+.env
