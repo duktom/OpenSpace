@@ -12,9 +12,9 @@ from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Account
 
-
-# JWT config
-
+# -----------------------
+# JWT config (keep simple)
+# -----------------------
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-insecure-secret")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -22,24 +22,25 @@ COOKIE_NAME = "open_space_auth"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="account/login", auto_error=False)
 
-
+# -----------------------
 # Password hashing config
-
-# Argon2id preferred + bcrypt for old hashes.
+# -----------------------
+# Argon2id first (best modern choice) + bcrypt for old hashes.
+# deprecated=["bcrypt"] means: if user logs in and hash is bcrypt -> needs_rehash() becomes True.
 pwd_context = CryptContext(
     schemes=["argon2", "bcrypt"],
-    deprecated=["bcrypt"],  # bcrypt hashes will be rehashed to argon2 after login
-    argon2__type="ID",
+    deprecated=["bcrypt"],
+    argon2__type="ID",          # Argon2id
     argon2__time_cost=3,
-    argon2__memory_cost=65536,
+    argon2__memory_cost=65536,  # 64 MiB
     argon2__parallelism=2,
-    bcrypt__rounds=12,
+    bcrypt__rounds=12
 )
 
 
 def _get_pepper() -> bytes:
     """
-    Pepper = server secret used before hashing.
+    HASHING_PEPPER is a server secret (not stored in DB).
     Required in production-like environments.
     """
     env = os.getenv("ENVIRONMENT", "development").lower()
@@ -48,7 +49,7 @@ def _get_pepper() -> bytes:
     if pepper:
         return pepper.encode("utf-8")
 
-    # allow default only in dev/test so project runs easily
+    # allow dev/test fallback so local run/tests work
     if env in ("development", "dev", "test"):
         return b"dev-unsafe-pepper"
 
@@ -57,47 +58,48 @@ def _get_pepper() -> bytes:
 
 def _pepper_input(value: str) -> str:
     """
-    HMAC(pepper, password) -> hex string.
-    Then we hash that output with Argon2id/bcrypt.
+    We do HMAC(pepper, password) => hex string.
+    Then we hash that with Argon2id/bcrypt.
     """
-    return hmac.new(_get_pepper(), value.encode("utf-8"), hashlib.sha256).hexdigest()
+    digest = hmac.new(_get_pepper(), value.encode("utf-8"), hashlib.sha256).hexdigest()
+    return digest
 
 
-
+# -----------------------
 # REQUIRED password API
-
+# -----------------------
 def hash_password(plain: str) -> str:
     if not plain:
         raise ValueError("Password must not be empty")
     return pwd_context.hash(_pepper_input(plain))
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    if not plain_password or not hashed_password:
+def verify_password(plain: str, hashed: str) -> bool:
+    if not plain or not hashed:
         return False
     try:
-        return pwd_context.verify(_pepper_input(plain_password), hashed_password)
+        return pwd_context.verify(_pepper_input(plain), hashed)
     except Exception:
         return False
 
 
-def needs_rehash(hashed_password: str) -> bool:
-    if not hashed_password:
+def needs_rehash(hashed: str) -> bool:
+    if not hashed:
         return False
     try:
-        return pwd_context.needs_update(hashed_password)
+        return pwd_context.needs_update(hashed)
     except Exception:
         return True
 
 
-# Backwards-compatible name used by your register code
+# Backwards compatible name used by your register services
 def get_password_hash(password: str) -> str:
     return hash_password(password)
 
 
-
-# JWT helpers 
-
+# -----------------------
+# JWT helpers (same idea)
+# -----------------------
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
