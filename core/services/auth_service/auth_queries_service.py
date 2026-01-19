@@ -27,7 +27,7 @@ class AuthQueries(BaseQueries):
         except MissingDatabaseError as e:
             logger.error(f"Database error during get_account_by_email: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
-        
+
     def update_account_password_hash(self, account_id: int, new_hash: str) -> None:
         try:
             with db_session_scope(commit=True) as session:
@@ -78,7 +78,6 @@ class AuthQueries(BaseQueries):
                 )
                 session.add(new_company)
                 session.flush()  # To get new_company.id
-                
 
                 # Link Account as CompanyAdmin
                 new_admin = CompanyRecruiter(
@@ -136,7 +135,7 @@ class AuthQueries(BaseQueries):
                     # Add other applicant-specific fields here
                 )
                 session.add(new_user)
-                session.flush() 
+                session.flush()
 
                 return {
                     "account_id": new_account.id,
@@ -155,4 +154,3 @@ class AuthQueries(BaseQueries):
         except Exception as e:
             logger.error(f"Unexpected error during register_user: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
-        

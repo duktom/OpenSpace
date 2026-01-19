@@ -63,9 +63,7 @@ def _pepper_input(value: str) -> str:
     return hmac.new(_get_pepper(), value.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
-
 # REQUIRED password API
-
 def hash_password(plain: str) -> str:
     if not plain:
         raise ValueError("Password must not be empty")
@@ -95,9 +93,7 @@ def get_password_hash(password: str) -> str:
     return hash_password(password)
 
 
-
-# JWT helpers 
-
+# JWT helpers
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

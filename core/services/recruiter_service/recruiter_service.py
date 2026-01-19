@@ -33,7 +33,7 @@ class RecruiterService:
                 )
                 .all()
             )
-        
+
     def add_user_to_company_recruiters(self, company_id: int, user_account_id: int, current_account: Account) -> dict:
         self._assert_admin_and_company_match(current_account, company_id)
 
@@ -46,9 +46,7 @@ class RecruiterService:
 
             already = session.query(
                 exists().where(
-                    (CompanyRecruiter.account_id == user_account_id) &
-                    (CompanyRecruiter.company_id == company_id)
-                )
+                    (CompanyRecruiter.account_id == user_account_id) & (CompanyRecruiter.company_id == company_id))
             ).scalar()
             if already:
                 return {"status": "ok", "detail": "ALREADY_ASSIGNED", "company_id": company_id, "account_id": user_account_id}

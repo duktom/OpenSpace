@@ -56,7 +56,7 @@ class CompanyRatingQueriesService(BaseQueries):
                 if existing_rating:
                     old_score = existing_rating.score
                     existing_rating.score = score
-                    
+
                     new_count = old_count
                     new_avg = ((old_avg * old_count) - old_score + score) / new_count
                 else:
@@ -66,7 +66,7 @@ class CompanyRatingQueriesService(BaseQueries):
                         score=score
                     )
                     session.add(new_rating)
-                    
+
                     new_count = old_count + 1
                     new_avg = ((old_avg * old_count) + score) / new_count
 
@@ -100,7 +100,7 @@ class CompanyRatingQueriesService(BaseQueries):
                     old_count = company.ratings_count
                     old_avg = float(company.rating)
 
-                    new_count = old_count -1
+                    new_count = old_count - 1
 
                     if new_count > 0:
                         new_avg = ((old_avg * old_count) - score_to_remove) / new_count
@@ -111,7 +111,7 @@ class CompanyRatingQueriesService(BaseQueries):
                     company.rating = new_avg
 
                 return {"message": "Rating deleted successfully"}
-            
+
         except Exception as e:
             logger.error(f"Error during rating deletion: {e}")
             raise HTTPException(status_code=500, detail="Could not delete rating")

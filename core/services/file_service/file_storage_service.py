@@ -39,12 +39,7 @@ class ImageService:
                 exists().where(model.id == object_id)
             ).scalar()
 
-    def upload_object_image(
-                self,
-                object_id: int,
-                file: UploadFile = File(...)
-            ):
-
+    def upload_object_image(self, object_id: int, file: UploadFile = File(...)):
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=500,

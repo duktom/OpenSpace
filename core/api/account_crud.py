@@ -20,9 +20,6 @@ from core.services.auth_service.auth_config import (
 )
 from database.schemas.register_schema import RegisterCompanySchema
 
-from core.services.auth_service.auth_config import needs_rehash, hash_password
-
-
 
 router = APIRouter(prefix="/account", tags=["Accounts"])
 service = BaseQueries(Account)
@@ -56,7 +53,7 @@ async def login(credentials: AccountSchemaPOST, response: Response):
     if not account or not verify_password(credentials.password, account.password):
         raise HTTPException(
             status_code=401, detail="INCORRECT EMAIL OR PASSWORD")
-    
+
     if needs_rehash(account.password):
         new_hash = hash_password(credentials.password)
         auth_service.update_account_password_hash(account.id, new_hash)
