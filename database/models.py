@@ -10,10 +10,13 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     Text,
     and_,
-    Float
+    Float,
+    CheckConstraint,
+    UniqueConstraint,
+    Numeric
 )
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship, declarative_base, foreign, remote
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 
 metadata = MetaData()
@@ -158,6 +161,8 @@ class Company(Base):
     ein = Column(String(10), unique=True, nullable=False)
     address = Column(JSONB, default={}, nullable=False)
     description = Column(String(255), nullable=True)
+    rating = Column(Numeric(3, 2), default=0)
+    ratings_count = Column(Integer, default=0)
     account_id = Column(
         Integer,
         ForeignKey("account.id", ondelete="RESTRICT"),
@@ -169,7 +174,6 @@ class Company(Base):
 
     profile_img_id = Column(Text, nullable=True)
     profile_img_link = Column(Text, nullable=True)
-
 
     jobs = relationship(
         "Job",
@@ -344,3 +348,15 @@ class EntityTag(Base):
     )
 
 
+class CompanyRating(Base):
+    __tablename__ = "company_rating"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    score = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint('score >= 1 AND score <= 5', name='check_score_range'),
+        UniqueConstraint('company_id', 'user_id', name='unique_user_company_rating'),
+    )
