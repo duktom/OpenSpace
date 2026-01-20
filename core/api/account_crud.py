@@ -27,8 +27,15 @@ auth_service = AuthQueries()
 
 
 @router.get("/", response_model=list[AccountSchemaGET])
-async def get_all_accounts():
+async def get_all_accounts(
+    current_account: Account = Depends(get_current_account)
+):
+    if current_account.type != "admin":
+        raise HTTPException(status_code=403, detail="FORBIDDEN")
+
     return service.get_all()
+
+
 
 
 @router.get("/me/", response_model=AccountMeSchemaGET)
