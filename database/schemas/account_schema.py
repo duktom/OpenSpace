@@ -26,7 +26,8 @@ class AccountSchemaPOST(BaseModel):
 
 class AccountSchemaPUT(BaseModel):
     id: int
-    email: str
-    password: str
+    email: str | None = None
+    password: str | None = None
+    # Admin-managed fields kept optional for compatibility; they are ignored in /account/edit/
     type: str | None = None
-    is_verified: bool
+    is_verified: bool | None = None

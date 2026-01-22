@@ -1,5 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from core.services.auth_service.auth_config import get_current_account
+from core.services.auth_service.company_access import assert_company_admin
+from database import db_session_scope
 from database.models import Company, Account
 from database.schemas.company_schema import CompanySchemaGET
 from database.schemas.company_schema import CompanySchemaPUT
@@ -29,22 +31,50 @@ async def get_object_image(object_id: int,):
 
 
 @router.post("/image/{object_id}/", summary="Upload image for a Company")
-async def upload_object_image(object_id: int, file: UploadFile = File(...)):
+async def upload_object_image(
+    object_id: int,
+    file: UploadFile = File(...),
+    current_account: Account = Depends(get_current_account),
+):
+    assert_company_admin(current_account=current_account, company_id=object_id)
     return image_service.upload_object_image(object_id, file)
 
 
 @router.put("/edit/")
-async def edit_company(schema: CompanySchemaPUT):
-    return service.update_record(schema)
+async def edit_company(
+    schema: CompanySchemaPUT,
+    current_account: Account = Depends(get_current_account),
+):
+    assert_company_admin(current_account=current_account, company_id=schema.id)
+    with db_session_scope(commit=True) as session:
+        company = session.query(Company).filter(Company.id == schema.id).first()
+        if not company:
+            raise HTTPException(status_code=404, detail="COMPANY_NOT_FOUND")
+
+        company.name = schema.name
+        company.description = schema.description
+
+        session.flush()
+        session.refresh(company)
+        session.expunge(company)
+        return company
 
 
 @router.delete("/delete/")
-async def delete_company(id: int):
+async def delete_company(
+    id: int,
+    current_account: Account = Depends(get_current_account),
+):
+    assert_company_admin(current_account=current_account, company_id=id)
     return service.delete_record(id)
 
 
 @router.delete("/image/delete/{object_id}/", summary="Delete image for a Company")
-async def delete_object_image(object_id: int):
+async def delete_object_image(
+    object_id: int,
+    current_account: Account = Depends(get_current_account),
+):
+    assert_company_admin(current_account=current_account, company_id=object_id)
     return image_service.delete_object_image(object_id)
 
 

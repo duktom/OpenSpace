@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response, Depends
 
+from database import db_session_scope
+
 from database.models import Account
 from database.schemas.account_schema import AccountMeSchemaGET, AccountSchemaGET
 from database.schemas.account_schema import AccountSchemaPOST
@@ -50,7 +52,13 @@ def read_user_me(response: Response, current_account: Account = Depends(get_curr
 
 
 @router.get("/{id}/", response_model=AccountSchemaGET)
-async def get_account_by_id(id: int):
+async def get_account_by_id(
+    id: int,
+    current_account: Account = Depends(get_current_account),
+):
+    # Owner can read own account; admin can read any account
+    if (current_account.type or "").lower() != "admin" and current_account.id != id:
+        raise HTTPException(status_code=403, detail="FORBIDDEN")
     return service.get_by_id(id)
 
 
@@ -100,11 +108,47 @@ async def register_user(schema: RegisterUserSchema):
     }
 
 
-@router.put("/edit/")
-async def edit_account(schema: AccountSchemaPUT):
-    return service.update_record(schema)
+@router.put("/edit/", response_model=AccountSchemaGET)
+async def edit_account(
+    schema: AccountSchemaPUT,
+    current_account: Account = Depends(get_current_account),
+):
+    # Only owner can modify own account
+    if current_account.id != schema.id:
+        raise HTTPException(status_code=403, detail="FORBIDDEN")
+
+    # Only allow email/password changes via this endpoint
+    with db_session_scope(commit=True) as session:
+        account = session.query(Account).filter(Account.id == schema.id).first()
+        if not account:
+            raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+
+        if schema.email:
+            account.email = schema.email
+
+        if schema.password:
+            account.password = hash_password(schema.password)
+
+        session.flush()
+        session.refresh(account)
+        session.expunge(account)
+        return account
 
 
-@router.delete("/delete/")
-async def delete_account(id: int):
-    return service.delete_record(id)
+@router.delete("/delete/", response_model=AccountSchemaGET)
+async def delete_account(
+    id: int,
+    current_account: Account = Depends(get_current_account),
+):
+    # Only owner can delete own account
+    if current_account.id != id:
+        raise HTTPException(status_code=403, detail="FORBIDDEN")
+
+    with db_session_scope(commit=True) as session:
+        account = session.query(Account).filter(Account.id == id).first()
+        if not account:
+            raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+        session.delete(account)
+        session.flush()
+        session.expunge(account)
+        return account
