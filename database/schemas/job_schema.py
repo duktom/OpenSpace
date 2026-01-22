@@ -22,8 +22,9 @@ class JobSchemaGET(BaseModel):
 class JobSchemaPOST(BaseModel):
     title: str
     description: str
-
+    payoff: float
 
 class JobSchemaPUT(BaseModel):
     title: str
     description: str
+    payoff: float | None = None
