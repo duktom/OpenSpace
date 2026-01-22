@@ -1,16 +1,17 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Depends
 
-from database.models import Job
+from database.models import Job, Account
 from database.schemas.job_schema import JobSchemaGET
 from database.schemas.job_schema import JobSchemaPOST
 from database.schemas.job_schema import JobSchemaPUT
 
-from core.services.queries_service.base_queries import BaseQueries
+from core.services.queries_service.job_queries import JobQueries
 from core.services.file_service.file_storage_service import ImageService
+from core.services.auth_service.auth_config import get_current_account
 
 
 router = APIRouter(prefix="/job", tags=["Job"])
-service = BaseQueries(Job)
+service = JobQueries(Job)
 image_service = ImageService(Job)
 
 
