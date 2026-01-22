@@ -30,8 +30,8 @@ async def get_object_image(object_id: int,):
 
 
 @router.post("/add/")
-async def add_job(schema: JobSchemaPOST):
-    return service.post_record(schema)
+async def add_job(schema: JobSchemaPOST, current_account: Account = Depends(get_current_account)):
+    return service.create_job_for_account(schema, current_account)
 
 
 @router.post("/image/{object_id}", summary="Upload image for Job posting")
