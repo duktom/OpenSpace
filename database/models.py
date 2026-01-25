@@ -227,7 +227,7 @@ class Job(Base):
     payoff = Column(Float, nullable=False)
     description = Column(String, nullable=False)
     posting_date = Column(DateTime(timezone=True), server_default=func.now())
-    expiry_date = Column(DateTime, nullable=True)
+    expiry_date = Column(DateTime(timezone=True), nullable=True)
     posting_img_id = Column(Text, nullable=True)
     posting_img_link = Column(Text, nullable=True)
 
