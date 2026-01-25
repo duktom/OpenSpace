@@ -2,6 +2,7 @@ from sqlalchemy import (
     Column,
     MetaData,
     String,
+    Text,
     Integer,
     Boolean,
     DateTime,
@@ -159,7 +160,7 @@ class Company(Base):
     name = Column(String(255), nullable=False)
     ein = Column(String(10), unique=True, nullable=False)
     address = Column(JSONB, default={}, nullable=False)
-    description = Column(String(255), nullable=True)
+    description = Column(Text(), nullable=True)
     rating = Column(Numeric(3, 2), default=0)
     ratings_count = Column(Integer, default=0)
     account_id = Column(
@@ -225,7 +226,7 @@ class Job(Base):
 
     title = Column(String, nullable=False)
     payoff = Column(Float, nullable=False)
-    description = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
     posting_date = Column(DateTime(timezone=True), server_default=func.now())
     expiry_date = Column(DateTime(timezone=True), nullable=True)
     posting_img_id = Column(Text, nullable=True)
