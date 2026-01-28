@@ -1,6 +1,10 @@
 from datetime import datetime
 from pydantic import BaseModel
 from pydantic import ConfigDict
+from typing import Optional
+
+from database.schemas.user_schema import UserSchemaGET
+from database.schemas.company_schema import CompanySchemaGET
 
 
 class AccountSchemaGET(BaseModel):
@@ -15,9 +19,12 @@ class AccountSchemaGET(BaseModel):
 
 
 class AccountMeSchemaGET(BaseModel):
-    account_type: str
     access_token: str
     message: str
+    account_id: int
+    account_type: str | None = None
+    user: Optional[UserSchemaGET] = None
+    company: Optional[CompanySchemaGET] = None
 
 
 class AccountSchemaPOST(BaseModel):

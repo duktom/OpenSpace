@@ -45,10 +45,40 @@ def read_user_me(response: Response, current_account: Account = Depends(get_curr
     access_token = create_access_token(data={"sub": current_account.email})
     set_auth_cookie(response, access_token)
 
+    # Load user or company based on account type
+    user_data = None
+    company_data = None
+
+    with db_session_scope(commit=False) as session:
+        from sqlalchemy.orm import joinedload
+        account = (
+            session.query(Account)
+            .options(
+                joinedload(Account.user),
+                joinedload(Account.admin_company)
+            )
+            .filter(Account.id == current_account.id)
+            .first()
+        )
+        
+        if not account:
+            raise HTTPException(status_code=404, detail="ACCOUNT_NOT_FOUND")
+        
+        # Load User if account type is "applicant"
+        if account.type == "applicant" and account.user:
+            user_data = account.user
+        
+        # Load Company if account type is "admin"
+        if account.type == "admin" and account.admin_company:
+            company_data = account.admin_company
+
     return {
+        "account_id": current_account.id,
         "account_type": current_account.type,
+        "user": user_data,
+        "company": company_data,
         "access_token": access_token,
-        "message": "AUTHENTICATED"
+        "message": "AUTHENTICATED",
     }
 
 
