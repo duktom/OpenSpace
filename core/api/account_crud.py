@@ -46,6 +46,7 @@ def read_user_me(response: Response, current_account: Account = Depends(get_curr
     set_auth_cookie(response, access_token)
 
     return {
+        "account_type": current_account.type,
         "access_token": access_token,
         "message": "AUTHENTICATED"
     }

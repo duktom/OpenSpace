@@ -15,6 +15,7 @@ class AccountSchemaGET(BaseModel):
 
 
 class AccountMeSchemaGET(BaseModel):
+    account_type: str
     access_token: str
     message: str
 
